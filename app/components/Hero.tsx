@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { motion, useAnimation, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useAnimation, useScroll, useTransform, useMotionValue, useSpring, MotionValue } from 'framer-motion';
 
 export const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -47,14 +47,14 @@ export const Hero = () => {
   const gridX = useTransform(scrollY, [0, 1000], [0, -50]);
   const gridY = useTransform(scrollY, [0, 1000], [0, -50]);
 
-   // Combined transforms for parallax elements
+  // Combined transforms for parallax elements
   const parallaxX = useTransform(
-    [mouseXSpring, scrollY],
-    ([mx, sy]: [number, number]) => mx * 40 + sy * 0.05
+    [mouseXSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+    ([mx, sy]: number[]) => (mx as number) * 40 + (sy as number) * 0.05
   );
   const parallaxY = useTransform(
-    [mouseYSpring, scrollY],
-    ([my, sy]: [number, number]) => my * 40 - sy * 0.1
+    [mouseYSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+    ([my, sy]: number[]) => (my as number) * 40 - (sy as number) * 0.1
   );
 
   // Optimized mouse tracking with RAF
@@ -147,7 +147,7 @@ export const Hero = () => {
       transition: { 
         duration: 1.2,
         delay: 0.6,
-        ease: "easeOut"
+        ease: [0.4, 0, 0.2, 1]
       }
     }
   }), []);
@@ -163,7 +163,7 @@ export const Hero = () => {
       transition: { 
         duration: 1,
         delay: 1.8,
-        ease: "easeOut"
+        ease: [0.4, 0, 0.2, 1]
       }
     }
   }), []);
@@ -200,7 +200,7 @@ export const Hero = () => {
       <motion.div 
         className="absolute inset-0"
         style={{ 
-          filter: useTransform(blur, (b) => `blur(${b}px)`)
+          filter: useTransform(blur, (b: number) => `blur(${b}px)`)
         }}
       >
         {/* Animated gradient background with scroll */}
@@ -238,7 +238,7 @@ export const Hero = () => {
             className="absolute top-3/4 right-1/3 w-24 h-24 border border-white/5"
             style={{ 
               y: y2,
-              rotate: useTransform(bgRotate, (r) => -r),
+              rotate: useTransform(bgRotate, (r: number) => -r),
               scale: useTransform(scrollYProgress, [0, 1], [1, 0.3])
             }}
           />
@@ -286,7 +286,7 @@ export const Hero = () => {
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
         {/* Subtitle with scroll */}
         <motion.div
-          variants={subtitleVariants}
+          // variants={subtitleVariants}
           initial="hidden"
           animate={controls}
           style={{ 
@@ -298,12 +298,12 @@ export const Hero = () => {
           <div className="text-xl md:text-3xl lg:text-4xl font-light text-white/80 tracking-wider">
             {subtitle.split(' ').map((word, index) => {
               const wordX = useTransform(
-                [mouseXSpring, scrollY],
-                ([mx, sy]) => mx * (index % 2 === 0 ? 15 : -15) - sy * 0.05
+                [mouseXSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+                ([mx, sy]: number[]) => (mx as number) * (index % 2 === 0 ? 15 : -15) - (sy as number) * 0.05
               );
               const wordY = useTransform(
-                [mouseYSpring, scrollY],
-                ([my, sy]) => my * (index % 2 === 0 ? -8 : 8) - sy * 0.03
+                [mouseYSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+                ([my, sy]: number[]) => (my as number) * (index % 2 === 0 ? -8 : 8) - (sy as number) * 0.03
               );
               
               return (
@@ -327,7 +327,7 @@ export const Hero = () => {
         {/* Title with enhanced scroll effects */}
         <motion.div
           className="mb-8"
-          variants={titleVariants}
+          // variants={titleVariants}
           initial="hidden"
           animate={controls}
           style={{ 
@@ -341,12 +341,12 @@ export const Hero = () => {
               <div key={`word-${wordIndex}`} className="flex justify-center">
                 {word.split('').map((letter, letterIndex) => {
                   const letterX = useTransform(
-                    [mouseXSpring, scrollY],
-                    ([mx, sy]) => mx * (letterIndex - word.length / 2) * 3 - sy * 0.1
+                    [mouseXSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+                    ([mx, sy]: number[]) => (mx as number) * (letterIndex - word.length / 2) * 3 - (sy as number) * 0.1
                   );
                   const letterY = useTransform(
-                    [mouseYSpring, scrollY],
-                    ([my, sy]) => my * (letterIndex % 2 === 0 ? -8 : 8) - sy * 0.15
+                    [mouseYSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
+                    ([my, sy]: number[]) => (my as number) * (letterIndex % 2 === 0 ? -8 : 8) - (sy as number) * 0.15
                   );
                   const letterRotateY = useTransform(
                     scrollY,
@@ -357,7 +357,7 @@ export const Hero = () => {
                   return (
                     <motion.span
                       key={`letter-${wordIndex}-${letterIndex}`}
-                      variants={letterVariants}
+                      // variants={letterVariants}
                       className="inline-block"
                       style={{
                         transformOrigin: "50% 50% -50px",
@@ -401,7 +401,7 @@ export const Hero = () => {
 
       {/* Scroll indicator with parallax */}
       <motion.div
-        variants={scrollIndicatorVariants}
+        // variants={scrollIndicatorVariants}
         initial="hidden"
         animate={controls}
         style={{ 

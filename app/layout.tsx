@@ -20,7 +20,7 @@ const workFont = localFont({
 });
 
 // Enhanced metadata for SEO and social sharing
-export const Metadata = {
+const metadata: Metadata = {
   title: {
     default: "Aurelrmdh | Portfolio",
     template: "%s | Aurel Dev Portfolio"
