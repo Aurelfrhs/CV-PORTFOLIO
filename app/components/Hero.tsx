@@ -47,14 +47,14 @@ export const Hero = () => {
   const gridX = useTransform(scrollY, [0, 1000], [0, -50]);
   const gridY = useTransform(scrollY, [0, 1000], [0, -50]);
 
-  // Combined transforms for parallax elements
+   // Combined transforms for parallax elements
   const parallaxX = useTransform(
     [mouseXSpring, scrollY],
-    ([mx, sy]) => mx * 40 + sy * 0.05
+    ([mx, sy]: [number, number]) => mx * 40 + sy * 0.05
   );
   const parallaxY = useTransform(
     [mouseYSpring, scrollY],
-    ([my, sy]) => my * 40 - sy * 0.1
+    ([my, sy]: [number, number]) => my * 40 - sy * 0.1
   );
 
   // Optimized mouse tracking with RAF
