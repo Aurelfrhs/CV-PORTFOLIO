@@ -25,20 +25,8 @@ export const Metadata = {
     default: "Aurelrmdh | Portfolio",
     template: "%s | Aurel Dev Portfolio"
   },
-  description: "Experience the art of digital storytelling through cinematic web experiences. A portfolio showcasing creative development, visual narratives, and immersive digital solutions.",
-  keywords: [
-    "aurel dev", 
-    "portfolio", 
-    "web developer", 
-    "ui designer", 
-    "creative developer",
-    "cinematic", 
-    "storytelling", 
-    "next.js", 
-    "typescript",
-    "framer motion",
-    "gsap"
-  ],
+  description: "Experience the art of digital storytelling through cinematic web experiences...",
+  keywords: ["aurel dev", "portfolio", "next.js", "typescript", "framer motion", "gsap"],
   authors: [{ name: "Aurel Dev", url: "https://aureldev.com" }],
   creator: "Aurel Dev",
   openGraph: {
@@ -47,7 +35,7 @@ export const Metadata = {
     url: "https://aureldev.com",
     siteName: "Aurel Dev Portfolio",
     title: "Aurel Dev - Cinematic Storytelling Portfolio",
-    description: "Experience the art of digital storytelling through cinematic web experiences and creative development.",
+    description: "Experience the art of digital storytelling...",
     images: [
       {
         url: "/og-aurel-portfolio.jpg",
@@ -213,7 +201,7 @@ const Navigation = () => {
                 </div>
                 <div className="mt-8 pt-6 border-t border-white/5">
                   <p className="text-white/40 text-sm">
-                    Copyright © 2025 Aurel Fristian. All rights reserved.
+                    Copyright Â© 2025 Aurel Fristian. All rights reserved.
                   </p>
                 </div>
               </div>
@@ -315,13 +303,13 @@ function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-white/60 text-sm">
-              © 2025 Aurel Dev. All rights reserved.
+              Â© 2025 Aurel Dev. All rights reserved.
             </p>
             <div className="flex items-center space-x-6 text-white/60 text-sm">
               <a href="#" className="hover:text-white transition-colors">Privacy</a>
               <a href="#" className="hover:text-white transition-colors">Terms</a>
-              <span className="text-white/40">•</span>
-              <span>Made with ❤️ and lots of ☕</span>
+              <span className="text-white/40">â€¢</span>
+              <span>Made with â¤ï¸ and lots of â˜•</span>
             </div>
           </div>
         </div>

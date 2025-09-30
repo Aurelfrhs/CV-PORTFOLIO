@@ -6,9 +6,8 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { Hero } from './components/Hero';
 import Skills from './components/Skills';
-// import Projects from './components/Projects';
-// import Vision from './components/Vision';
-// import Contact from './components/Contact';
+import Projects from './components/Projects';
+import Contact from './components/Contact';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -31,7 +30,6 @@ const SECTIONS: Section[] = [
   { id: 'hero', label: 'Hero' },
   { id: 'skills', label: 'Skills' },
   { id: 'projects', label: 'Projects' },
-  { id: 'vision', label: 'Vision' },
   { id: 'contact', label: 'Contact' }
 ];
 
@@ -559,74 +557,21 @@ export default function Home() {
 
       <ChapterDivider
         chapter="Chapter III"
-        title="The Stories"
-        subtitle="Digital narratives brought to life"
+        title="Projects"
       />
 
-      {/* <SceneTransition id="projects">
+      <SceneTransition id="projects">
         <Projects />
-      </SceneTransition> */}
+      </SceneTransition>
 
       <ChapterDivider
-        chapter="Chapter IV"
-        title="The Vision"
-        subtitle="Future possibilities await"
+        chapter="End"
+        title="Contact"
       />
 
-      {/* <SceneTransition id="vision">
-        <Vision />
-      </SceneTransition> */}
-
-      <ChapterDivider
-        chapter="Epilogue"
-        title="The Connection"
-        subtitle="Let's create something extraordinary"
-      />
-{/* 
       <SceneTransition id="contact">
         <Contact />
-      </SceneTransition> */}
-
-      {/* Credits */}
-      <motion.div
-        className="relative py-32 text-center bg-gradient-to-b from-black via-gray-900/20 to-black"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 2 }}
-      >
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="space-y-8 text-white/60 max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.3 }}
-          >
-            <div className="text-sm font-mono tracking-widest uppercase">
-              End of Story
-            </div>
-            <div className="text-2xl font-cinematic leading-relaxed">
-              Thank you for experiencing this cinematic journey
-            </div>
-            <div className="text-white/40 leading-relaxed">
-              Every pixel tells a story, every interaction creates an emotion.
-            </div>
-
-            <motion.div
-              className="pt-12 text-xs text-white/30 space-y-2"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 1.5, duration: 1 }}
-            >
-              <div>Designed & Developed by Aurel Dev</div>
-              <div>Built with Next.js, TypeScript, Tailwind CSS, Framer Motion & GSAP</div>
-              <div>Made with ❤️ in Bandung, Indonesia • 2025</div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.div>
+      </SceneTransition>
 
       {/* Back to top button */}
       <motion.button

@@ -1,4 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+
+// Register GSAP plugins
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 // SVG Icon Components
 const HtmlIcon = () => (
@@ -64,26 +72,172 @@ const SKILLS_DATA = {
   ]
 };
 
-const SkillItem = ({ skill }) => {
+const SkillItem = ({ skill, index }) => {
   const IconComponent = skill.icon;
+  const itemRef = useRef(null);
   
+  useEffect(() => {
+    if (!itemRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(itemRef.current,
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: 'back.out(1.7)',
+          scrollTrigger: {
+            trigger: itemRef.current,
+            start: 'top 90%',
+            toggleActions: 'play none none reverse'
+          },
+          delay: index * 0.1
+        }
+      );
+    }, itemRef.current);
+
+    return () => ctx.revert();
+  }, [index]);
+
   return (
-    <div className="flex-shrink-0 mx-6 md:mx-10 group cursor-pointer">
-      <div className="flex flex-col items-center space-y-3 transition-transform duration-500 hover:scale-110">
-        <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${skill.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:rotate-6`}>
+    <motion.div 
+      ref={itemRef}
+      className="flex-shrink-0 mx-6 md:mx-10 group cursor-pointer opacity-0"
+      whileHover={{ scale: 1.15, rotate: 3 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <div className="flex flex-col items-center space-y-3">
+        <motion.div 
+          className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${skill.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500`}
+          whileHover={{ 
+            rotate: [0, -5, 5, -5, 0],
+            boxShadow: '0 20px 40px rgba(255,255,255,0.3)'
+          }}
+          transition={{ duration: 0.5 }}
+        >
           <IconComponent />
-        </div>
-        <span className="text-base md:text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 whitespace-nowrap">
+        </motion.div>
+        <motion.span 
+          className="text-base md:text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 whitespace-nowrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
           {skill.name}
-        </span>
+        </motion.span>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 const Skills = () => {
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const frontendRef = useRef(null);
+  const backendRef = useRef(null);
   const frontendMarqueeRef = useRef(null);
   const backendMarqueeRef = useRef(null);
+  const frontendContainerRef = useRef(null);
+  const backendContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Header animation
+      gsap.fromTo(headerRef.current,
+        {
+          opacity: 0,
+          y: 80,
+          scale: 0.9
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.2,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: headerRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      // Frontend section animation
+      gsap.fromTo(frontendRef.current,
+        {
+          opacity: 0,
+          x: -100,
+          rotateY: -15
+        },
+        {
+          opacity: 1,
+          x: 0,
+          rotateY: 0,
+          duration: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: frontendRef.current,
+            start: 'top 75%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      // Backend section animation
+      gsap.fromTo(backendRef.current,
+        {
+          opacity: 0,
+          x: 100,
+          rotateY: 15
+        },
+        {
+          opacity: 1,
+          x: 0,
+          rotateY: 0,
+          duration: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: backendRef.current,
+            start: 'top 75%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      // Container hover effects
+      [frontendContainerRef.current, backendContainerRef.current].forEach((container) => {
+        if (!container) return;
+
+        container.addEventListener('mouseenter', () => {
+          gsap.to(container, {
+            scale: 1.02,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        });
+
+        container.addEventListener('mouseleave', () => {
+          gsap.to(container, {
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        });
+      });
+
+    }, sectionRef.current);
+
+    return () => ctx.revert();
+  }, []);
 
   useEffect(() => {
     if (frontendMarqueeRef.current) {
@@ -95,7 +249,7 @@ const Skills = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black py-20 px-4">
+    <div ref={sectionRef} className="min-h-screen bg-black py-20 px-4">
       <style>{`
         @keyframes marquee-right {
           0% { transform: translateX(-50%); }
@@ -120,92 +274,172 @@ const Skills = () => {
 
       <div className="max-w-7xl mx-auto relative">
         {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <motion.div 
+          className="absolute inset-0 overflow-hidden pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2 }}
+        >
+          <motion.div 
+            className="absolute top-1/4 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3]
+            }}
+            transition={{ 
+              duration: 8, 
+              repeat: Infinity,
+              ease: "easeInOut" 
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"
+            animate={{ 
+              scale: [1, 1.3, 1],
+              opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{ 
+              duration: 10, 
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
           
           {/* Floating particles */}
           {[...Array(5)].map((_, i) => (
-            <div
+            <motion.div
               key={i}
               className="absolute w-2 h-2 bg-white/20 rounded-full"
               style={{
                 left: `${20 + i * 20}%`,
                 top: `${10 + i * 15}%`,
-                animation: `float ${3 + i * 0.5}s ease-in-out infinite`,
-                animationDelay: `${i * 0.3}s`
+              }}
+              animate={{
+                y: [-15, 15, -15],
+              }}
+              transition={{
+                duration: 3 + i * 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.3
               }}
             />
           ))}
-        </div>
+        </motion.div>
 
         {/* Header Section */}
-        <div className="text-center mb-2 relative">
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6">
-            <span className="font-big font-bold">
+        <div ref={headerRef} className="text-center mb-16 relative opacity-0">
+          <motion.h2 
+            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-white">
               SKILLS
             </span>
-          </h2>
+          </motion.h2>
           
-          <p className="font-work text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+          <motion.p 
+            className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, delay: 0.4 }}
+          >
             I have skills in using various technologies that support web development effectively and efficiently, from design to database management and dynamic web application development.
-          </p>
+          </motion.p>
         </div>
 
         {/* Frontend Section */}
-        <div className="mb-16">
-          <div className="flex items-center justify-center mb-8">
+        <div ref={frontendRef} className="mb-16 opacity-0">
+          <motion.div 
+            className="flex items-center justify-center mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
             <div className="px-8">
-              <h3 className=" text-3xl md:text-4xl font-bold">
+              <h3 className="text-3xl md:text-4xl font-bold">
                 Frontend Development
               </h3>
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
-          </div>
+          </motion.div>
           
-          <div className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-cyan-400/30 transition-all duration-500">
+          <motion.div 
+            ref={frontendContainerRef}
+            className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-cyan-400/30 transition-all duration-500"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
             <div className="relative flex whitespace-nowrap">
               <div ref={frontendMarqueeRef} className="flex">
                 {[...Array(15)].map((_, setIndex) => 
                   SKILLS_DATA.frontend.map((skill, index) => (
-                    <SkillItem key={`frontend-${setIndex}-${index}`} skill={skill} />
+                    <SkillItem 
+                      key={`frontend-${setIndex}-${index}`} 
+                      skill={skill}
+                      index={index}
+                    />
                   ))
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Backend Section */}
-        <div>
-          <div className="flex items-center justify-center mb-8">
+        <div ref={backendRef} className="opacity-0">
+          <motion.div 
+            className="flex items-center justify-center mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
             <div className="px-8">
-              <h3 className=" text-3xl md:text-4xl font-bold">
+              <h3 className="text-3xl md:text-4xl font-bold">
                 Backend Development
               </h3>
             </div>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
-          </div>
+          </motion.div>
           
-          <div className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 transition-all duration-500">
+          <motion.div 
+            ref={backendContainerRef}
+            className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 transition-all duration-500"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-red-500/5"></div>
             <div className="relative flex whitespace-nowrap">
               <div ref={backendMarqueeRef} className="flex">
                 {[...Array(20)].map((_, setIndex) => 
                   SKILLS_DATA.backend.map((skill, index) => (
-                    <SkillItem key={`backend-${setIndex}-${index}`} skill={skill} />
+                    <SkillItem
+                      key={`backend-${setIndex}-${index}`} 
+                      skill={skill}
+                      index={index}
+                    />
                   ))
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
   );
-};
-
+}
 export default Skills;
