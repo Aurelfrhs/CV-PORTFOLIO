@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Simplified icons (no external dependencies)
 const Icons = {
@@ -36,15 +36,31 @@ const Icons = {
   )
 };
 
-const projects = [
+interface Project {
+  id: number;
+  title: string;
+  category: string;
+  year: string;
+  emoji: string;
+  description: string;
+  longDescription: string;
+  tech: string[];
+  features: string[];
+  challenges: string[];
+  outcomes: string[];
+  liveUrl: string;
+  githubUrl: string;
+}
+
+const projects: Project[] = [
   {
     id: 1,
-    title: "Cinematic Web Experience",
+    title: "In Coming",
     category: "Web Development",
     year: "2024",
-    emoji: "🌐",
-    description: "An immersive web platform featuring cinematic storytelling, smooth animations, and interactive elements.",
-    longDescription: "A comprehensive web experience that combines cinematic storytelling with modern web technologies. Features include scroll-triggered animations, 3D elements, and progressive narrative structure.",
+    emoji: "In Coming",
+    description: "In Coming",
+    longDescription: "In Coming",
     tech: ["Next.js", "Three.js", "GSAP", "TypeScript", "Tailwind CSS", "Framer Motion"],
     features: [
       "Scroll-triggered animations",
@@ -69,12 +85,12 @@ const projects = [
   },
   {
     id: 2,
-    title: "Brand Identity System",
+    title: "In Coming",
     category: "Visual Design",
     year: "2024",
-    emoji: "🎨",
-    description: "Complete brand identity design including logo, color palette, typography, and visual guidelines.",
-    longDescription: "Comprehensive brand identity system developed for a modern tech startup, including all visual elements and brand guidelines.",
+    emoji: "In Coming",
+    description: "In Coming",
+    longDescription: "In Coming",
     tech: ["Figma", "Adobe Illustrator", "After Effects", "Photoshop"],
     features: [
       "Logo design & variations",
@@ -99,12 +115,12 @@ const projects = [
   },
   {
     id: 3,
-    title: "React Dashboard Platform",
+    title: "In Coming",
     category: "Frontend",
     year: "2024",
-    emoji: "⚛️",
-    description: "Modern admin dashboard with real-time data visualization and intuitive user interface.",
-    longDescription: "Feature-rich dashboard platform built with React, featuring real-time analytics, data visualization, and comprehensive admin tools.",
+    emoji: "In Coming",
+    description: "In Coming",
+    longDescription: "In Coming",
     tech: ["React", "TypeScript", "Recharts", "Zustand", "React Query", "Vite"],
     features: [
       "Real-time analytics",
@@ -127,103 +143,13 @@ const projects = [
     liveUrl: "https://example.com",
     githubUrl: "https://github.com"
   },
-  {
-    id: 4,
-    title: "E-Commerce Platform",
-    category: "Full Stack",
-    year: "2024",
-    emoji: "🛒",
-    description: "Modern e-commerce solution with payment integration and inventory management.",
-    longDescription: "Complete e-commerce platform with user authentication, payment processing, order management, and real-time inventory tracking.",
-    tech: ["Next.js", "Node.js", "PostgreSQL", "Stripe", "Redis", "Docker"],
-    features: [
-      "Secure payment processing",
-      "Real-time inventory",
-      "Order tracking",
-      "User authentication",
-      "Admin dashboard",
-      "Email notifications"
-    ],
-    challenges: [
-      "Payment security implementation",
-      "Scalable architecture design",
-      "Real-time data synchronization"
-    ],
-    outcomes: [
-      "Processing 1000+ orders daily",
-      "99.9% uptime achieved",
-      "5-star customer satisfaction"
-    ],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com"
-  },
-  {
-    id: 5,
-    title: "Mobile App Design",
-    category: "UI/UX Design",
-    year: "2023",
-    emoji: "📱",
-    description: "Intuitive mobile application design with focus on user experience and modern aesthetics.",
-    longDescription: "User-centered mobile app design featuring intuitive navigation, beautiful UI, and seamless user flows across iOS and Android platforms.",
-    tech: ["Figma", "Sketch", "Principle", "Adobe XD"],
-    features: [
-      "User research & personas",
-      "Wireframing & prototyping",
-      "High-fidelity mockups",
-      "Interactive prototypes",
-      "Design system",
-      "Usability testing"
-    ],
-    challenges: [
-      "Cross-platform consistency",
-      "Accessibility requirements",
-      "Complex user flows"
-    ],
-    outcomes: [
-      "4.8 star app rating",
-      "30% increase in retention",
-      "Design award finalist"
-    ],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com"
-  },
-  {
-    id: 6,
-    title: "AI Content Generator",
-    category: "AI/ML",
-    year: "2024",
-    emoji: "🤖",
-    description: "AI-powered content generation tool using advanced machine learning models.",
-    longDescription: "Intelligent content generation platform leveraging state-of-the-art AI models to create high-quality written content, images, and multimedia assets.",
-    tech: ["Python", "TensorFlow", "OpenAI API", "FastAPI", "React", "MongoDB"],
-    features: [
-      "Multiple content types",
-      "Custom AI training",
-      "Batch processing",
-      "API integration",
-      "Content analytics",
-      "Export options"
-    ],
-    challenges: [
-      "Model optimization",
-      "API cost management",
-      "Content quality control"
-    ],
-    outcomes: [
-      "10,000+ users onboarded",
-      "95% content approval rate",
-      "50% time savings reported"
-    ],
-    liveUrl: "https://example.com",
-    githubUrl: "https://github.com"
-  }
 ];
 
 export default function ResponsiveProjects() {
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [activeTab, setActiveTab] = useState('overview');
-  const modalRef = useRef(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeTab, setActiveTab] = useState<string>('overview');
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const categories = useMemo(() => 
     ['All', ...Array.from(new Set(projects.map(p => p.category)))], 
@@ -237,24 +163,24 @@ export default function ResponsiveProjects() {
     [activeCategory]
   );
 
-  // useEffect(() => {
-  //   const handleEscape = (e) => {
-  //     if (e.key === 'Escape') setSelectedProject(null);
-  //   };
-  //   window.addEventListener('keydown', handleEscape);
-  //   return () => window.removeEventListener('keydown', handleEscape);
-  // }, []);
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedProject(null);
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, []);
 
-  // useEffect(() => {
-  //   if (selectedProject) {
-  //     document.body.style.overflow = 'hidden';
-  //   } else {
-  //     document.body.style.overflow = 'unset';
-  //   }
-  //   return () => {
-  //     document.body.style.overflow = 'unset';
-  //   };
-  // }, [selectedProject]);
+  useEffect(() => {
+    if (selectedProject) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedProject]);
 
   return (
     <>
@@ -322,7 +248,7 @@ export default function ResponsiveProjects() {
               {filteredProjects.map((project, index) => (
                 <div
                   key={project.id}
-                  // onClick={() => setSelectedProject(project)}
+                  onClick={() => setSelectedProject(project)}
                   className="group cursor-pointer transform transition-all duration-500 hover:scale-105"
                   style={{
                     animation: 'slideUp 0.6s ease-out forwards',
@@ -432,13 +358,13 @@ export default function ResponsiveProjects() {
               <div className="sticky top-0 z-10 bg-gray-900/95 backdrop-blur-sm border-b border-white/10 p-4 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                    {/* <div className="text-3xl sm:text-4xl flex-shrink-0">{selectedProject.emoji}</div> */}
+                    <div className="text-3xl sm:text-4xl flex-shrink-0">{selectedProject.emoji}</div>
                     <div className="min-w-0">
                       <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">
-                        {/* {selectedProject.title} */}
+                        {selectedProject.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-white/60">
-                        {/* {selectedProject.category} • {selectedProject.year} */}
+                        {selectedProject.category} • {selectedProject.year}
                       </p>
                     </div>
                   </div>
@@ -453,7 +379,7 @@ export default function ResponsiveProjects() {
 
                 <div className="flex gap-2 mt-4">
                   <a
-                    // href={selectedProject.liveUrl}
+                    href={selectedProject.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white text-black hover:bg-white/90 rounded-lg text-xs sm:text-sm font-medium transition-all hover:scale-105"
@@ -463,7 +389,7 @@ export default function ResponsiveProjects() {
                     <span className="sm:hidden">Demo</span>
                   </a>
                   <a
-                    // href={selectedProject.githubUrl}
+                    href={selectedProject.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-white/30 text-white hover:bg-white/10 rounded-lg text-xs sm:text-sm font-medium transition-all hover:scale-105"
@@ -499,13 +425,13 @@ export default function ResponsiveProjects() {
                     <div className="space-y-6 animate-fadeIn">
                       <div>
                         <h4 className="text-base sm:text-lg font-semibold text-white mb-3">Project Description</h4>
-                        {/* <p className="text-sm sm:text-base text-white/80 leading-relaxed">{selectedProject.longDescription}</p> */}
+                        <p className="text-sm sm:text-base text-white/80 leading-relaxed">{selectedProject.longDescription}</p>
                       </div>
                       
                       <div>
                         <h4 className="text-base sm:text-lg font-semibold text-white mb-3">Key Features</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                          {/* {selectedProject.features.map((feature, index) => (
+                          {selectedProject.features.map((feature: string, index: number) => (
                             <div 
                               key={index} 
                               className="flex items-center gap-2 text-xs sm:text-sm text-white/70 p-2 sm:p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
@@ -518,7 +444,7 @@ export default function ResponsiveProjects() {
                               <Icons.Zap />
                               <span>{feature}</span>
                             </div>
-                          ))} */}
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -529,7 +455,7 @@ export default function ResponsiveProjects() {
                       <div>
                         <h4 className="text-base sm:text-lg font-semibold text-white mb-4">Technology Stack</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-                          {/* {selectedProject.tech.map((tech, idx) => (
+                          {selectedProject.tech.map((tech: string, idx: number) => (
                             <div
                               key={tech}
                               className="p-2 sm:p-3 bg-white/10 rounded-lg text-center hover:bg-white/20 transition-all hover:scale-105 cursor-pointer"
@@ -541,7 +467,7 @@ export default function ResponsiveProjects() {
                             >
                               <div className="text-xs sm:text-sm text-white/90 font-mono">{tech}</div>
                             </div>
-                          ))} */}
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -552,7 +478,7 @@ export default function ResponsiveProjects() {
                       <div>
                         <h4 className="text-base sm:text-lg font-semibold text-white mb-4">Challenges & Solutions</h4>
                         <div className="space-y-2 sm:space-y-3">
-                          {/* {selectedProject.challenges.map((challenge, index) => (
+                          {selectedProject.challenges.map((challenge: string, index: number) => (
                             <div 
                               key={index} 
                               className="p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-lg hover:bg-red-500/15 transition-colors"
@@ -564,7 +490,7 @@ export default function ResponsiveProjects() {
                             >
                               <p className="text-xs sm:text-sm text-white/80 leading-relaxed">{challenge}</p>
                             </div>
-                          ))} */}
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -575,7 +501,7 @@ export default function ResponsiveProjects() {
                       <div>
                         <h4 className="text-base sm:text-lg font-semibold text-white mb-4">Project Outcomes</h4>
                         <div className="space-y-2 sm:space-y-3">
-                          {/* {selectedProject.outcomes.map((outcome, index) => (
+                          {selectedProject.outcomes.map((outcome: string, index: number) => (
                             <div 
                               key={index} 
                               className="p-3 sm:p-4 bg-green-500/10 border border-green-500/20 rounded-lg hover:bg-green-500/15 transition-colors"
@@ -587,7 +513,7 @@ export default function ResponsiveProjects() {
                             >
                               <p className="text-xs sm:text-sm text-white/80 font-semibold">{outcome}</p>
                             </div>
-                          ))} */}
+                          ))}
                         </div>
                       </div>
                     </div>

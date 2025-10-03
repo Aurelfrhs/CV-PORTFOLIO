@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { Hero } from './components/Hero';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
+import { useEffect, useRef, useState } from 'react';
 import Contact from './components/Contact';
+import { Hero } from './components/Hero';
+import Projects from './components/Projects';
+import Skills from './components/Skills';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -48,11 +48,13 @@ const ScrollProgress = () => {
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       const progress = Math.min(scrolled / maxScroll, 1);
       
-      gsap.to(progressRef.current, {
-        scaleX: progress,
-        duration: 0.1,
-        ease: 'none'
-      });
+      if (progressRef.current) {
+        gsap.to(progressRef.current, {
+          scaleX: progress,
+          duration: 0.1,
+          ease: 'none'
+        });
+      }
     };
 
     window.addEventListener('scroll', updateProgress);
@@ -193,7 +195,7 @@ const ChapterDivider = ({
         '-=1'
       )
       // Animate dots
-      .fromTo(dotsRef.current?.children || [],
+      .fromTo(dotsRef.current?.children ? Array.from(dotsRef.current.children) : [],
         { opacity: 0, scale: 0 },
         { opacity: 0.6, scale: 1, duration: 0.4, stagger: 0.1, ease: 'back.out(2)' },
         '-=0.3'
@@ -258,7 +260,7 @@ const NavigationDots = () => {
     if (!dotsRef.current) return;
 
     // Animate dots entrance
-    gsap.fromTo(dotsRef.current.children,
+    gsap.fromTo(Array.from(dotsRef.current.children),
       { opacity: 0, x: 20 },
       {
         opacity: 1,
@@ -306,7 +308,7 @@ const NavigationDots = () => {
       className="fixed right-8 top-1/2 transform -translate-y-1/2 z-40 hidden lg:block"
     >
       <div className="flex flex-col space-y-4">
-        {SECTIONS.map(({ id }, index) => (
+        {SECTIONS.map(({ id }) => (
           <button
             key={id}
             onClick={() => scrollToSection(id)}
@@ -339,8 +341,8 @@ const LoadingScreen = ({ isVisible }: { isVisible: boolean }) => {
       
       tl.set([titleRef.current, subtitleRef.current], { opacity: 0, y: 20 })
         .to(spinnerRef.current, { rotation: 360, duration: 2, repeat: -1, ease: 'none' })
-        .to(titleRef.current, { opacity: 1, y: 0, duration: 0.8, delay: 0.5 })
-        .to(subtitleRef.current, { opacity: 1, duration: 0.8, delay: 0.5 });
+        .to(titleRef.current, { opacity: 1, y: 0, duration: 0.8, delay: 0.5 }, 0.5)
+        .to(subtitleRef.current, { opacity: 1, duration: 0.8, delay: 0.5 }, 1);
 
       // Exit animation
       if (!isVisible) {
@@ -504,7 +506,7 @@ export default function Home() {
     ScrollTrigger.refresh();
 
     // Smooth scroll for anchor links
-    const handleAnchorClick = (e: Event) => {
+    const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLAnchorElement;
       if (target.hash && target.getAttribute('href')?.startsWith('#')) {
         e.preventDefault();
@@ -519,10 +521,10 @@ export default function Home() {
       }
     };
 
-    document.addEventListener('click', handleAnchorClick);
+    document.addEventListener('click', handleAnchorClick as EventListener);
 
     return () => {
-      document.removeEventListener('click', handleAnchorClick);
+      document.removeEventListener('click', handleAnchorClick as EventListener);
       ScrollTrigger.killAll();
     };
   }, []);

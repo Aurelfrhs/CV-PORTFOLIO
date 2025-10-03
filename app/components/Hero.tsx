@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { motion, useAnimation, useScroll, useTransform, useMotionValue, useSpring, MotionValue } from 'framer-motion';
+import { motion, MotionValue, useAnimation, useMotionValue, useScroll, useSpring, useTransform, Variants } from 'framer-motion';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -97,7 +97,7 @@ export const Hero = () => {
   }, [controls]);
 
   // Memoized animation variants
-  const titleVariants = useMemo(() => ({
+  const titleVariants: Variants = useMemo(() => ({
     hidden: { 
       opacity: 0, 
       y: 100,
@@ -109,13 +109,13 @@ export const Hero = () => {
       scale: 1,
       transition: { 
         duration: 1.4,
-        ease: [0.6, 0.05, 0.2, 0.9],
+        ease: [0.6, 0.05, 0.2, 0.9] as [number, number, number, number],
         staggerChildren: 0.08
       }
     }
   }), []);
 
-  const letterVariants = useMemo(() => ({
+  const letterVariants: Variants = useMemo(() => ({
     hidden: { 
       opacity: 0, 
       y: 80,
@@ -129,12 +129,12 @@ export const Hero = () => {
       filter: "blur(0px)",
       transition: { 
         duration: 0.9,
-        ease: [0.6, 0.05, 0.2, 0.9]
+        ease: [0.6, 0.05, 0.2, 0.9] as [number, number, number, number]
       }
     }
   }), []);
 
-  const subtitleVariants = useMemo(() => ({
+  const subtitleVariants: Variants = useMemo(() => ({
     hidden: { 
       opacity: 0, 
       y: 40,
@@ -147,12 +147,12 @@ export const Hero = () => {
       transition: { 
         duration: 1.2,
         delay: 0.6,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number]
       }
     }
   }), []);
 
-  const scrollIndicatorVariants = useMemo(() => ({
+  const scrollIndicatorVariants: Variants = useMemo(() => ({
     hidden: { 
       opacity: 0, 
       y: 40
@@ -163,7 +163,7 @@ export const Hero = () => {
       transition: { 
         duration: 1,
         delay: 1.8,
-        ease: [0.4, 0, 0.2, 1]
+        ease: [0.4, 0, 0.2, 1] as [number, number, number, number]
       }
     }
   }), []);
@@ -286,7 +286,7 @@ export const Hero = () => {
       <div className="relative z-10 text-center px-6 max-w-6xl mx-auto">
         {/* Subtitle with scroll */}
         <motion.div
-          // variants={subtitleVariants}
+          variants={subtitleVariants}
           initial="hidden"
           animate={controls}
           style={{ 
@@ -327,7 +327,7 @@ export const Hero = () => {
         {/* Title with enhanced scroll effects */}
         <motion.div
           className="mb-8"
-          // variants={titleVariants}
+          variants={titleVariants}
           initial="hidden"
           animate={controls}
           style={{ 
@@ -357,7 +357,7 @@ export const Hero = () => {
                   return (
                     <motion.span
                       key={`letter-${wordIndex}-${letterIndex}`}
-                      // variants={letterVariants}
+                      variants={letterVariants}
                       className="inline-block"
                       style={{
                         transformOrigin: "50% 50% -50px",
@@ -401,7 +401,7 @@ export const Hero = () => {
 
       {/* Scroll indicator with parallax */}
       <motion.div
-        // variants={scrollIndicatorVariants}
+        variants={scrollIndicatorVariants}
         initial="hidden"
         animate={controls}
         style={{ 
@@ -461,6 +461,185 @@ export const Hero = () => {
           />
         ))}
       </div>
+
+      {/* Unique Feature 1: Morphing Ring System */}
+      <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        <motion.svg
+          width="800"
+          height="800"
+          viewBox="0 0 800 800"
+          className="absolute"
+          style={{
+            opacity: useTransform(scrollY, [0, 400], [0.6, 0]),
+            scale: useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 0.8])
+          }}
+        >
+          <motion.circle
+            cx="400"
+            cy="400"
+            r="200"
+            fill="none"
+            stroke="rgba(255,255,255,0.1)"
+            strokeWidth="2"
+            strokeDasharray="10 20"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.circle
+            cx="400"
+            cy="400"
+            r="250"
+            fill="none"
+            stroke="rgba(255,255,255,0.05)"
+            strokeWidth="1"
+            strokeDasharray="5 15"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.circle
+            cx="400"
+            cy="400"
+            r="300"
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth="1.5"
+            strokeDasharray="15 25"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          />
+        </motion.svg>
+      </motion.div>
+
+      {/* Unique Feature 2: Trailing Cursor Effect */}
+      <motion.div
+        className="absolute w-64 h-64 pointer-events-none rounded-full"
+        style={{
+          x: useTransform(mouseXSpring, (x: number) => x * 300),
+          y: useTransform(mouseYSpring, (y: number) => y * 300),
+          opacity: useTransform(scrollY, [0, 200], [0.15, 0]),
+          background: "radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)",
+          filter: "blur(60px)",
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}
+      />
+
+      {/* Unique Feature 3: Binary Rain Effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={`binary-${i}`}
+            className="absolute text-white/5 font-mono text-xs"
+            style={{
+              left: `${(i * 5)}%`,
+              top: '-10%',
+            }}
+            animate={{
+              y: ['0vh', '110vh'],
+              opacity: [0, 0.5, 0]
+            }}
+            transition={{
+              duration: 10 + Math.random() * 10,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+              ease: "linear"
+            }}
+          >
+            {Array(20).fill(0).map(() => Math.random() > 0.5 ? '1' : '0').join('\n')}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Unique Feature 4: Holographic Scanner Line */}
+      <motion.div
+        className="absolute left-0 right-0 h-px pointer-events-none"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+          boxShadow: "0 0 20px rgba(255,255,255,0.5)",
+          opacity: useTransform(scrollY, [0, 300], [0.7, 0])
+        }}
+        animate={{
+          top: ['0%', '100%']
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+
+      {/* Unique Feature 5: Glitch Effect Overlay */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none mix-blend-difference"
+        animate={{
+          opacity: [0, 0, 0.05, 0, 0]
+        }}
+        transition={{
+          duration: 0.1,
+          repeat: Infinity,
+          repeatDelay: Math.random() * 5 + 3
+        }}
+      >
+        <div className="absolute inset-0 bg-white" />
+      </motion.div>
+
+      {/* Unique Feature 6: Particle Constellation */}
+      <motion.svg 
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ opacity: useTransform(scrollY, [0, 400], [0.3, 0]) as any }}
+      >
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        {[...Array(30)].map((_, i) => {
+          const x1 = Math.random() * 100;
+          const y1 = Math.random() * 100;
+          const x2 = Math.random() * 100;
+          const y2 = Math.random() * 100;
+          return (
+            <motion.line
+              key={`constellation-${i}`}
+              x1={`${x1}%`}
+              y1={`${y1}%`}
+              x2={`${x2}%`}
+              y2={`${y2}%`}
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="0.5"
+              filter="url(#glow)"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+              transition={{
+                pathLength: { duration: 2, delay: i * 0.1 },
+                opacity: { duration: 3, delay: i * 0.1, repeat: Infinity, repeatDelay: 2 }
+              }}
+            />
+          );
+        })}
+      </motion.svg>
+
+      {/* Unique Feature 7: Vignette Pulse */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%)",
+          opacity: useTransform(scrollY, [0, 300], [1, 0.5])
+        }}
+        animate={{
+          opacity: [0.8, 0.95, 0.8]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
 
       {/* Background light effects with scroll */}
       <div className="absolute inset-0 pointer-events-none">

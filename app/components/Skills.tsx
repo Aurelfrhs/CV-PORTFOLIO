@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+import { useEffect, useRef } from 'react';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -57,7 +57,16 @@ const MysqlIcon = () => (
   </svg>
 );
 
-const SKILLS_DATA = {
+interface Skill {
+  name: string;
+  icon: React.ComponentType;
+  color: string;
+}
+
+const SKILLS_DATA: {
+  frontend: Skill[];
+  backend: Skill[];
+} = {
   frontend: [
     { name: "HTML", icon: HtmlIcon, color: "from-orange-500 to-red-400" },
     { name: "CSS", icon: CssIcon, color: "from-blue-500 to-cyan-400" },
@@ -72,79 +81,84 @@ const SKILLS_DATA = {
   ]
 };
 
-// const SkillItem = ({ skill, index }) => {
-//   const IconComponent = skill.icon;
-//   const itemRef = useRef(null);
+interface SkillItemProps {
+  skill: Skill;
+  index: number;
+}
+
+const SkillItem = ({ skill, index }: SkillItemProps) => {
+  const IconComponent = skill.icon;
+  const itemRef = useRef<HTMLDivElement>(null);
   
-//   useEffect(() => {
-//     if (!itemRef.current) return;
+  useEffect(() => {
+    if (!itemRef.current) return;
 
-//     const ctx = gsap.context(() => {
-//       gsap.fromTo(itemRef.current,
-//         {
-//           opacity: 0,
-//           y: 50,
-//           scale: 0.8
-//         },
-//         {
-//           opacity: 1,
-//           y: 0,
-//           scale: 1,
-//           duration: 0.8,
-//           ease: 'back.out(1.7)',
-//           scrollTrigger: {
-//             trigger: itemRef.current,
-//             start: 'top 90%',
-//             toggleActions: 'play none none reverse'
-//           },
-//           delay: index * 0.1
-//         }
-//       );
-//     }, itemRef.current);
+    const ctx = gsap.context(() => {
+      gsap.fromTo(itemRef.current,
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.8
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: 'back.out(1.7)',
+          scrollTrigger: {
+            trigger: itemRef.current,
+            start: 'top 90%',
+            toggleActions: 'play none none reverse'
+          },
+          delay: index * 0.1
+        }
+      );
+    }, itemRef.current);
 
-//     return () => ctx.revert();
-//   }, [index]);
+    return () => ctx.revert();
+  }, [index]);
 
-//   return (
-//     <motion.div 
-//       ref={itemRef}
-//       className="flex-shrink-0 mx-6 md:mx-10 group cursor-pointer opacity-0"
-//       whileHover={{ scale: 1.15, rotate: 3 }}
-//       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-//     >
-//       <div className="flex flex-col items-center space-y-3">
-//         <motion.div 
-//           className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${skill.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500`}
-//           whileHover={{ 
-//             rotate: [0, -5, 5, -5, 0],
-//             boxShadow: '0 20px 40px rgba(255,255,255,0.3)'
-//           }}
-//           transition={{ duration: 0.5 }}
-//         >
-//           <IconComponent />
-//         </motion.div>
-//         <motion.span 
-//           className="text-base md:text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 whitespace-nowrap"
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 1 }}
-//           transition={{ delay: 0.2 }}
-//         >
-//           {skill.name}
-//         </motion.span>
-//       </div>
-//     </motion.div>
-//   );
-// };
+  return (
+    <motion.div 
+      ref={itemRef}
+      className="flex-shrink-0 mx-6 md:mx-10 group cursor-pointer opacity-0"
+      whileHover={{ scale: 1.15, rotate: 3 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
+      <div className="flex flex-col items-center space-y-3">
+        <motion.div 
+          className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${skill.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-500`}
+          whileHover={{ 
+            rotate: [0, -5, 5, -5, 0],
+            boxShadow: '0 20px 40px rgba(255,255,255,0.3)'
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          <IconComponent />
+        </motion.div>
+        <motion.span 
+          className="text-base md:text-lg font-bold text-white/90 group-hover:text-white transition-colors duration-300 whitespace-nowrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          {skill.name}
+        </motion.span>
+      </div>
+    </motion.div>
+  );
+};
 
 const Skills = () => {
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const frontendRef = useRef(null);
-  const backendRef = useRef(null);
-  const frontendMarqueeRef = useRef(null);
-  const backendMarqueeRef = useRef(null);
-  const frontendContainerRef = useRef(null);
-  const backendContainerRef = useRef(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const frontendRef = useRef<HTMLDivElement>(null);
+  const backendRef = useRef<HTMLDivElement>(null);
+  const frontendMarqueeRef = useRef<HTMLDivElement>(null);
+  const backendMarqueeRef = useRef<HTMLDivElement>(null);
+  const frontendContainerRef = useRef<HTMLDivElement>(null);
+  const backendContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -214,39 +228,42 @@ const Skills = () => {
       );
 
       // Container hover effects
-      // [frontendContainerRef.current, backendContainerRef.current].forEach((container) => {
-      //   if (!container) return;
+      [frontendContainerRef.current, backendContainerRef.current].forEach((container) => {
+        if (!container) return;
 
-      //   container.addEventListener('mouseenter', () => {
-      //     gsap.to(container, {
-      //       scale: 1.02,
-      //       duration: 0.3,
-      //       ease: 'power2.out'
-      //     });
-      //   });
+        const handleMouseEnter = () => {
+          gsap.to(container, {
+            scale: 1.02,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        };
 
-      //   container.addEventListener('mouseleave', () => {
-      //     gsap.to(container, {
-      //       scale: 1,
-      //       duration: 0.3,
-      //       ease: 'power2.out'
-      //     });
-      //   });
-      // });
+        const handleMouseLeave = () => {
+          gsap.to(container, {
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        };
+
+        container.addEventListener('mouseenter', handleMouseEnter);
+        container.addEventListener('mouseleave', handleMouseLeave);
+      });
 
     }, sectionRef.current);
 
     return () => ctx.revert();
   }, []);
 
-  // useEffect(() => {
-  //   if (frontendMarqueeRef.current) {
-  //     frontendMarqueeRef.current.style.animation = 'marquee-right 80s linear infinite';
-  //   }
-  //   if (backendMarqueeRef.current) {
-  //     backendMarqueeRef.current.style.animation = 'marquee-left 70s linear infinite';
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (frontendMarqueeRef.current) {
+      frontendMarqueeRef.current.style.animation = 'marquee-right 80s linear infinite';
+    }
+    if (backendMarqueeRef.current) {
+      backendMarqueeRef.current.style.animation = 'marquee-left 70s linear infinite';
+    }
+  }, []);
 
   return (
     <div ref={sectionRef} className="min-h-screen bg-black py-20 px-4">
@@ -382,7 +399,7 @@ const Skills = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
             <div className="relative flex whitespace-nowrap">
               <div ref={frontendMarqueeRef} className="flex">
-                {/* {[...Array(15)].map((_, setIndex) => 
+                {[...Array(15)].map((_, setIndex) => 
                   SKILLS_DATA.frontend.map((skill, index) => (
                     <SkillItem 
                       key={`frontend-${setIndex}-${index}`} 
@@ -390,7 +407,7 @@ const Skills = () => {
                       index={index}
                     />
                   ))
-                )} */}
+                )}
               </div>
             </div>
           </motion.div>
@@ -425,7 +442,7 @@ const Skills = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-red-500/5"></div>
             <div className="relative flex whitespace-nowrap">
               <div ref={backendMarqueeRef} className="flex">
-                {/* {[...Array(20)].map((_, setIndex) => 
+                {[...Array(20)].map((_, setIndex) => 
                   SKILLS_DATA.backend.map((skill, index) => (
                     <SkillItem
                       key={`backend-${setIndex}-${index}`} 
@@ -433,7 +450,7 @@ const Skills = () => {
                       index={index}
                     />
                   ))
-                )} */}
+                )}
               </div>
             </div>
           </motion.div>
@@ -442,4 +459,5 @@ const Skills = () => {
     </div>
   );
 }
+
 export default Skills;
