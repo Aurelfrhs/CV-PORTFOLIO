@@ -1,1 +1,8 @@
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="300" height="300" role="img" aria-label="Aurel Portfolio - Spiral A">
+  <style>:root{ --bg:#ffffff; --fg:#0b1220; --acc:#06b6d4; }</style>
+  <rect width="200" height="200" rx="28" fill="var(--bg)"/>
+  <!-- outer A -->
+  <path d="M44 148 L100 30 L156 148 L132 148 L100 86 L68 148 Z" fill="var(--fg)"/>
+  <!-- inner stylized triangular spiral -->
+  <path d="M96 84 L110 108 L88 116 L102 140 L72 124" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

@@ -18,6 +18,19 @@ const workFont = localFont({
   style: "normal"
 });
 
+export const metadata = {
+  title: 'Aurel | Portfolio',
+  description: 'Portfolio of Aurel Dev - Fullstack Developer & Designer',
+  icons: {
+    icon: [
+      { url: '/aurel-portfolio-logo.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+  },
+};
+
+
 // Enhanced Loading Screen with cinematic animation
 function LoadingScreen() {
   return (
