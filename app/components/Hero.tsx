@@ -295,7 +295,7 @@ export const Hero = () => {
           }}
           className="mb-8"
         >
-          <div className="text-xl md:text-3xl lg:text-4xl font-light text-white/80 tracking-wider">
+          <div className="font-work text-xl md:text-3xl lg:text-4xl font-light text-white/80 tracking-wider">
             {subtitle.split(' ').map((word, index) => {
               const wordX = useTransform(
                 [mouseXSpring, scrollY] as [MotionValue<number>, MotionValue<number>],
