@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { Footer } from "./layouts/Footer";
 import { Navigation } from "./layouts/Navigation";
+import type { Metadata } from "next";
 
 const bigFont = localFont({
   src: "/fonts/Big.woff2", 
@@ -18,7 +19,7 @@ const workFont = localFont({
   style: "normal"
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Aurel | Portfolio',
   description: 'Portfolio of Aurel Dev - Fullstack Developer & Designer',
   icons: {
@@ -30,41 +31,28 @@ export const metadata = {
   },
 };
 
-
-// Enhanced Loading Screen with cinematic animation
-function LoadingScreen() {
+// Simple Loading Fallback
+function LoadingFallback() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
-      <div className="relative mb-8">
-        {/* Multi-layered loading rings */}
-        <div className="w-20 h-20 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-        <div 
-          className="absolute inset-0 w-20 h-20 border-2 border-transparent border-b-white/40 rounded-full animate-spin" 
-          style={{animationDuration: '1.5s', animationDirection: 'reverse'}}
-        ></div>
-        <div 
-          className="absolute inset-2 w-16 h-16 border border-white/10 border-r-white/30 rounded-full animate-spin" 
-          style={{animationDuration: '2s'}}
-        ></div>
-        
-        {/* Center dot */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+      <div className="relative mb-6 sm:mb-8">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse"></div>
       </div>
       
-      {/* Loading text */}
       <div className="text-center space-y-2">
-        <div className="text-white/80 text-lg tracking-widest">
+        <div className="text-white/80 text-sm sm:text-base tracking-widest">
           AUREL
         </div>
-        <div className="text-white/60 text-sm tracking-wider animate-pulse">
-          Crafting Visual Stories...
+        <div className="text-white/60 text-[10px] sm:text-xs tracking-wider animate-pulse">
+          Loading...
         </div>
       </div>
     </div>
   );
 }
 
-// Enhanced Motion Wrapper with better background effects
+// Enhanced Motion Wrapper
 function MotionWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden relative">
@@ -85,8 +73,8 @@ function MotionWrapper({ children }: { children: React.ReactNode }) {
       <div className="fixed inset-0 bg-gradient-to-b from-black/0 via-black/10 to-black/30 pointer-events-none z-5" />
       <div className="fixed inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none z-5" />
       
-      {/* Floating light orbs */}
-      <div className="fixed inset-0 pointer-events-none z-5">
+      {/* Floating light orbs - Hidden on mobile for performance */}
+      <div className="fixed inset-0 pointer-events-none z-5 hidden sm:block">
         <div 
           className="absolute top-1/4 left-1/5 w-64 h-64 bg-white/[0.01] rounded-full blur-3xl animate-pulse" 
           style={{animationDelay: '0s', animationDuration: '8s'}}
@@ -106,12 +94,12 @@ function MotionWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Main Layout Component with Suspense for better loading
+// Main Layout Component
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en" className="scroll-smooth">
       <head>
@@ -122,13 +110,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
       </head>
       <body className={`${bigFont.variable} ${workFont.variable} font-sans antialiased`}>
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={<LoadingFallback />}>
           <MotionWrapper>
-            <Navigation />
-            <main className="relative z-20">
-              {children}
-            </main>
-            <Footer />
+            {/* Navigation will be conditionally rendered by page.tsx */}
+            {children}
           </MotionWrapper>
         </Suspense>
       </body>
