@@ -490,63 +490,6 @@ body {
 }
 
 /* ============================================================================
-   COMPONENT STYLES
-   ============================================================================ */
-
-@layer components {
-
-    /* Button Styles */
-    .btn-primary {
-        @apply px-6 py-3 bg-white text-black font-medium rounded-lg transition-all duration-300 hover:bg-white/90 hover:shadow-glow active:scale-95;
-    }
-
-    .btn-secondary {
-        @apply px-6 py-3 bg-transparent text-white border border-white/30 font-medium rounded-lg transition-all duration-300 hover:border-white/60 hover:bg-white/5 active:scale-95;
-    }
-
-    .btn-ghost {
-        @apply px-4 py-2 bg-transparent text-white/80 font-medium transition-all duration-300 hover:text-white hover:bg-white/5 active:scale-95;
-    }
-
-    /* Card Styles */
-    .card-cinematic {
-        @apply bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-6 transition-all duration-300 hover:border-white/20 hover:bg-black/60;
-    }
-
-    /* Input Styles */
-    .input-cinematic {
-        @apply w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 backdrop-blur-sm transition-all duration-300 focus:border-white/40 focus:bg-white/10 focus:outline-none;
-    }
-
-    .textarea-cinematic {
-        @apply w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/50 backdrop-blur-sm transition-all duration-300 focus:border-white/40 focus:bg-white/10 focus:outline-none resize-none min-h-[120px];
-    }
-
-    /* Typography */
-    .section-title {
-        @apply text-4xl md:text-5xl font-bold text-white mb-6 text-balance;
-    }
-
-    .section-subtitle {
-        @apply text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto text-balance;
-    }
-
-    /* Navigation */
-    .nav-link {
-        @apply relative text-white/80 hover:text-white transition-all duration-300;
-    }
-
-    .nav-link::after {
-        content: '';
-        @apply absolute -bottom-1 left-0 w-0 h-px bg-white transition-all duration-300;
-    }
-
-    .nav-link:hover::after {
-        @apply w-full;
-    }
-}
-
-/* ============================================================================
    RESPONSIVE ADJUSTMENTS
    ============================================================================ */
 
