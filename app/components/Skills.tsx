@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
@@ -8,7 +10,25 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// SVG Icon Components
+// ============================================================================
+// Types
+// ============================================================================
+
+interface Skill {
+  name: string;
+  icon: React.ComponentType;
+  color: string;
+}
+
+interface SkillItemProps {
+  skill: Skill;
+  index: number;
+}
+
+// ============================================================================
+// SVG Icons
+// ============================================================================
+
 const HtmlIcon = () => (
   <svg viewBox="0 0 24 24" className="w-6 h-6 md:w-8 md:h-8 text-white">
     <path fill="currentColor" d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm17.09 4.413L5.41 4.413l.213 2.622h10.125l-.255 2.716h-6.64l.24 2.573h6.182l-.366 3.523-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.288l5.373-1.53L18.59 4.414z"/>
@@ -57,11 +77,9 @@ const MysqlIcon = () => (
   </svg>
 );
 
-interface Skill {
-  name: string;
-  icon: React.ComponentType;
-  color: string;
-}
+// ============================================================================
+// Skills Data
+// ============================================================================
 
 const SKILLS_DATA: {
   frontend: Skill[];
@@ -81,10 +99,9 @@ const SKILLS_DATA: {
   ]
 };
 
-interface SkillItemProps {
-  skill: Skill;
-  index: number;
-}
+// ============================================================================
+// Components
+// ============================================================================
 
 const SkillItem = ({ skill, index }: SkillItemProps) => {
   const IconComponent = skill.icon;
@@ -94,12 +111,9 @@ const SkillItem = ({ skill, index }: SkillItemProps) => {
     if (!itemRef.current) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(itemRef.current,
-        {
-          opacity: 0,
-          y: 50,
-          scale: 0.8
-        },
+      gsap.fromTo(
+        itemRef.current,
+        { opacity: 0, y: 50, scale: 0.8 },
         {
           opacity: 1,
           y: 0,
@@ -150,27 +164,214 @@ const SkillItem = ({ skill, index }: SkillItemProps) => {
   );
 };
 
+const BackgroundEffects = () => (
+  <motion.div 
+    className="absolute inset-0 overflow-hidden pointer-events-none"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 2 }}
+  >
+    <motion.div 
+      className="absolute top-1/4 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"
+      animate={{ 
+        scale: [1, 1.2, 1],
+        opacity: [0.3, 0.5, 0.3]
+      }}
+      transition={{ 
+        duration: 8, 
+        repeat: Infinity,
+        ease: "easeInOut" 
+      }}
+    />
+    <motion.div 
+      className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"
+      animate={{ 
+        scale: [1, 1.3, 1],
+        opacity: [0.3, 0.6, 0.3]
+      }}
+      transition={{ 
+        duration: 10, 
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: 1
+      }}
+    />
+    
+    {Array.from({ length: 5 }, (_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-2 h-2 bg-white/20 rounded-full"
+        style={{
+          left: `${20 + i * 20}%`,
+          top: `${10 + i * 15}%`,
+        }}
+        animate={{ y: [-15, 15, -15] }}
+        transition={{
+          duration: 3 + i * 0.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: i * 0.3
+        }}
+      />
+    ))}
+  </motion.div>
+);
+
+// const SectionHeader = () => (
+//   <div ref={headerRef} className="text-center mb-16 relative opacity-0" id="skills-header">
+//     <motion.h2 
+//       className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6"
+//       initial={{ opacity: 0, y: 30 }}
+//       whileInView={{ opacity: 1, y: 0 }}
+//       viewport={{ once: true }}
+//       transition={{ duration: 0.8, delay: 0.2 }}
+//     >
+//       <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-300 to-white">
+//         SKILLS
+//       </span>
+//     </motion.h2>
+    
+//     <motion.p 
+//       className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto leading-relaxed text-white"
+//       initial={{ opacity: 0 }}
+//       whileInView={{ opacity: 1 }}
+//       viewport={{ once: true }}
+//       transition={{ duration: 1, delay: 0.4 }}
+//     >
+//       I have skills in using various technologies that support web development effectively and efficiently, 
+//       from design to database management and dynamic web application development.
+//     </motion.p>
+//   </div>
+// );
+
+const SkillsSection = ({ 
+  title, 
+  skills, 
+  gradient,
+  refProp
+}: { 
+  title: string; 
+  skills: Skill[]; 
+  gradient: string;
+  refProp: React.RefObject<HTMLDivElement | null>;
+}) => {
+  const marqueeRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!refProp.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        refProp.current,
+        { opacity: 0, x: title === 'Frontend Development' ? -100 : 100, rotateY: title === 'Frontend Development' ? -15 : 15 },
+        {
+          opacity: 1,
+          x: 0,
+          rotateY: 0,
+          duration: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: refProp.current,
+            start: 'top 75%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      );
+
+      if (containerRef.current) {
+        const handleMouseEnter = () => {
+          gsap.to(containerRef.current, {
+            scale: 1.02,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        };
+
+        const handleMouseLeave = () => {
+          gsap.to(containerRef.current, {
+            scale: 1,
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        };
+
+        containerRef.current.addEventListener('mouseenter', handleMouseEnter);
+        containerRef.current.addEventListener('mouseleave', handleMouseLeave);
+      }
+    }, refProp.current);
+
+    return () => ctx.revert();
+  }, [refProp, title]);
+
+  useEffect(() => {
+    if (marqueeRef.current) {
+      const direction = title === 'Frontend Development' ? 'marquee-right' : 'marquee-left';
+      const duration = title === 'Frontend Development' ? '80s' : '70s';
+      marqueeRef.current.style.animation = `${direction} ${duration} linear infinite`;
+    }
+  }, [title]);
+
+  return (
+    <div ref={refProp} className="mb-16 opacity-0">
+      <motion.div 
+        className="flex items-center justify-center mb-8"
+        initial={{ opacity: 0, scale: 0.9 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className={`h-px flex-1 bg-gradient-to-r from-transparent via-${gradient}/30 to-transparent`}></div>
+        <div className="px-8">
+          <h3 className="text-3xl md:text-4xl font-bold">{title}</h3>
+        </div>
+        <div className={`h-px flex-1 bg-gradient-to-r from-transparent via-${gradient}/30 to-transparent`}></div>
+      </motion.div>
+      
+      <motion.div 
+        ref={containerRef}
+        className={`relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-${gradient}/30 transition-all duration-500`}
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+      >
+        <div className={`absolute inset-0 bg-gradient-to-r from-${gradient}/5 to-blue-500/5`}></div>
+        <div className="relative flex whitespace-nowrap">
+          <div ref={marqueeRef} className="flex">
+            {Array.from({ length: 15 }, (_, setIndex) => 
+              skills.map((skill, index) => (
+                <SkillItem 
+                  key={`${title}-${setIndex}-${index}`} 
+                  skill={skill}
+                  index={index}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
 const Skills = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const frontendRef = useRef<HTMLDivElement>(null);
   const backendRef = useRef<HTMLDivElement>(null);
-  const frontendMarqueeRef = useRef<HTMLDivElement>(null);
-  const backendMarqueeRef = useRef<HTMLDivElement>(null);
-  const frontendContainerRef = useRef<HTMLDivElement>(null);
-  const backendContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!sectionRef.current) return;
+    if (!sectionRef.current || !headerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Header animation
-      gsap.fromTo(headerRef.current,
-        {
-          opacity: 0,
-          y: 80,
-          scale: 0.9
-        },
+      gsap.fromTo(
+        headerRef.current,
+        { opacity: 0, y: 80, scale: 0.9 },
         {
           opacity: 1,
           y: 0,
@@ -184,85 +385,9 @@ const Skills = () => {
           }
         }
       );
-
-      // Frontend section animation
-      gsap.fromTo(frontendRef.current,
-        {
-          opacity: 0,
-          x: -100,
-          rotateY: -15
-        },
-        {
-          opacity: 1,
-          x: 0,
-          rotateY: 0,
-          duration: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: frontendRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-
-      // Backend section animation
-      gsap.fromTo(backendRef.current,
-        {
-          opacity: 0,
-          x: 100,
-          rotateY: 15
-        },
-        {
-          opacity: 1,
-          x: 0,
-          rotateY: 0,
-          duration: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: backendRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none reverse'
-          }
-        }
-      );
-
-      // Container hover effects
-      [frontendContainerRef.current, backendContainerRef.current].forEach((container) => {
-        if (!container) return;
-
-        const handleMouseEnter = () => {
-          gsap.to(container, {
-            scale: 1.02,
-            duration: 0.3,
-            ease: 'power2.out'
-          });
-        };
-
-        const handleMouseLeave = () => {
-          gsap.to(container, {
-            scale: 1,
-            duration: 0.3,
-            ease: 'power2.out'
-          });
-        };
-
-        container.addEventListener('mouseenter', handleMouseEnter);
-        container.addEventListener('mouseleave', handleMouseLeave);
-      });
-
     }, sectionRef.current);
 
     return () => ctx.revert();
-  }, []);
-
-  useEffect(() => {
-    if (frontendMarqueeRef.current) {
-      frontendMarqueeRef.current.style.animation = 'marquee-right 80s linear infinite';
-    }
-    if (backendMarqueeRef.current) {
-      backendMarqueeRef.current.style.animation = 'marquee-left 70s linear infinite';
-    }
   }, []);
 
   return (
@@ -277,75 +402,11 @@ const Skills = () => {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
-        }
-        
-        @keyframes pulse-soft {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.8; }
-        }
       `}</style>
 
       <div className="max-w-7xl mx-auto relative">
-        {/* Background Effects */}
-        <motion.div 
-          className="absolute inset-0 overflow-hidden pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-        >
-          <motion.div 
-            className="absolute top-1/4 left-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3]
-            }}
-            transition={{ 
-              duration: 8, 
-              repeat: Infinity,
-              ease: "easeInOut" 
-            }}
-          />
-          <motion.div 
-            className="absolute bottom-1/4 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"
-            animate={{ 
-              scale: [1, 1.3, 1],
-              opacity: [0.3, 0.6, 0.3]
-            }}
-            transition={{ 
-              duration: 10, 
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1
-            }}
-          />
-          
-          {/* Floating particles */}
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 bg-white/20 rounded-full"
-              style={{
-                left: `${20 + i * 20}%`,
-                top: `${10 + i * 15}%`,
-              }}
-              animate={{
-                y: [-15, 15, -15],
-              }}
-              transition={{
-                duration: 3 + i * 0.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.3
-              }}
-            />
-          ))}
-        </motion.div>
-
-        {/* Header Section */}
+        <BackgroundEffects />
+        
         <div ref={headerRef} className="text-center mb-16 relative opacity-0">
           <motion.h2 
             className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6"
@@ -370,91 +431,19 @@ const Skills = () => {
           </motion.p>
         </div>
 
-        {/* Frontend Section */}
-        <div ref={frontendRef} className="mb-16 opacity-0">
-          <motion.div 
-            className="flex items-center justify-center mb-8"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
-            <div className="px-8">
-              <h3 className="text-3xl md:text-4xl font-bold">
-                Frontend Development
-              </h3>
-            </div>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent"></div>
-          </motion.div>
-          
-          <motion.div 
-            ref={frontendContainerRef}
-            className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-cyan-400/30 transition-all duration-500"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5"></div>
-            <div className="relative flex whitespace-nowrap">
-              <div ref={frontendMarqueeRef} className="flex">
-                {[...Array(15)].map((_, setIndex) => 
-                  SKILLS_DATA.frontend.map((skill, index) => (
-                    <SkillItem 
-                      key={`frontend-${setIndex}-${index}`} 
-                      skill={skill}
-                      index={index}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        <SkillsSection 
+          title="Frontend Development"
+          skills={SKILLS_DATA.frontend}
+          gradient="cyan-400"
+          refProp={frontendRef}
+        />
 
-        {/* Backend Section */}
-        <div ref={backendRef} className="opacity-0">
-          <motion.div 
-            className="flex items-center justify-center mb-8"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
-            <div className="px-8">
-              <h3 className="text-3xl md:text-4xl font-bold">
-                Backend Development
-              </h3>
-            </div>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent"></div>
-          </motion.div>
-          
-          <motion.div 
-            ref={backendContainerRef}
-            className="relative overflow-hidden bg-gradient-to-r from-white/5 via-white/10 to-white/5 rounded-3xl p-8 md:p-12 backdrop-blur-sm border border-white/10 hover:border-purple-400/30 transition-all duration-500"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-red-500/5"></div>
-            <div className="relative flex whitespace-nowrap">
-              <div ref={backendMarqueeRef} className="flex">
-                {[...Array(20)].map((_, setIndex) => 
-                  SKILLS_DATA.backend.map((skill, index) => (
-                    <SkillItem
-                      key={`backend-${setIndex}-${index}`} 
-                      skill={skill}
-                      index={index}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </div>
+        <SkillsSection 
+          title="Backend Development"
+          skills={SKILLS_DATA.backend}
+          gradient="purple-400"
+          refProp={backendRef}
+        />
       </div>
     </div>
   );

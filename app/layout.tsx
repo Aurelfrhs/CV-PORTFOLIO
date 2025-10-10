@@ -1,9 +1,7 @@
+import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import "./globals.css";
-import { Footer } from "./layouts/Footer";
-import { Navigation } from "./layouts/Navigation";
-import type { Metadata } from "next";
 
 const bigFont = localFont({
   src: "/fonts/Big.woff2", 
@@ -25,8 +23,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/aurel-portfolio-logo.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', type: 'image/x-icon' },
-      { url: '/favicon.png', type: 'image/png' },
     ],
   },
 };

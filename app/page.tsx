@@ -16,7 +16,10 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Types
+// ============================================================================
+// TYPES
+// ============================================================================
+
 interface Section {
   id: string;
   label: string;
@@ -27,7 +30,10 @@ interface MousePosition {
   y: number;
 }
 
-// Constants
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
 const SECTIONS: Section[] = [
   { id: 'hero', label: 'Hero' },
   { id: 'skills', label: 'Skills' },
@@ -35,10 +41,44 @@ const SECTIONS: Section[] = [
   { id: 'contact', label: 'Contact' }
 ];
 
-const SCROLL_OFFSET = 80;
+const SCROLL_CONFIG = {
+  OFFSET: 80,
+  DURATION: 1.5,
+  EASE: 'power2.inOut'
+} as const;
 
-// Scroll Progress Component
-const ScrollProgress = () => {
+const ANIMATION_CONFIG = {
+  SCENE_DURATION: 1.2,
+  SCENE_Y: 60,
+  SCENE_SCALE: 0.95,
+  PARALLAX: -10,
+  LOADING_INTERVAL: 100,
+  LOADING_DURATION: 900
+} as const;
+
+// ============================================================================
+// CUSTOM HOOKS
+// ============================================================================
+
+function useMouseTracking() {
+  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: (e.clientY / window.innerHeight) * 2 - 1
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return mousePosition;
+}
+
+function useScrollProgress() {
   const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,27 +100,87 @@ const ScrollProgress = () => {
     return () => window.removeEventListener('scroll', updateProgress);
   }, []);
 
+  return progressRef;
+}
+
+function useActiveSection(sections: Section[]) {
+  const [activeSection, setActiveSection] = useState(sections[0]?.id || '');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      sections.forEach(({ id }) => {
+        const element = document.getElementById(id);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(id);
+          }
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sections]);
+
+  return activeSection;
+}
+
+function useLoadingProgress(onComplete: () => void) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, ANIMATION_CONFIG.LOADING_INTERVAL);
+
+    const completeTimer = setTimeout(() => {
+      onComplete();
+    }, ANIMATION_CONFIG.LOADING_DURATION);
+
+    return () => {
+      clearInterval(progressInterval);
+      clearTimeout(completeTimer);
+    };
+  }, [onComplete]);
+
+  return progress;
+}
+
+// ============================================================================
+// UI COMPONENTS
+// ============================================================================
+
+function ScrollProgress() {
+  const progressRef = useScrollProgress();
+
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-black/20 backdrop-blur-sm">
       <div
         ref={progressRef}
-        className="h-full bg-gradient-to-r from-white via-gray-200 to-white origin-left shadow-[0_0_20px_rgba(255,255,255,0.3)] brightness-120"
+        className="h-full bg-gradient-to-r from-white via-gray-200 to-white origin-left shadow-[0_0_20px_rgba(255,255,255,0.3)]"
         style={{ transform: 'scaleX(0)' }}
       />
     </div>
   );
-};
+}
 
-// Scene Transition Component
-const SceneTransition = ({
-  children,
-  id,
-  className = ""
-}: {
+interface SceneTransitionProps {
   children: React.ReactNode;
   id: string;
   className?: string;
-}) => {
+}
+
+function SceneTransition({ children, id, className = "" }: SceneTransitionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -88,13 +188,18 @@ const SceneTransition = ({
     if (!sectionRef.current || !contentRef.current) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(contentRef.current,
-        { opacity: 0, y: 60, scale: 0.95 },
+      gsap.fromTo(
+        contentRef.current,
+        { 
+          opacity: 0, 
+          y: ANIMATION_CONFIG.SCENE_Y, 
+          scale: ANIMATION_CONFIG.SCENE_SCALE 
+        },
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          duration: 1.2,
+          duration: ANIMATION_CONFIG.SCENE_DURATION,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: sectionRef.current,
@@ -106,7 +211,7 @@ const SceneTransition = ({
       );
 
       gsap.to(sectionRef.current, {
-        yPercent: -10,
+        yPercent: ANIMATION_CONFIG.PARALLAX,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -133,106 +238,17 @@ const SceneTransition = ({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,transparent_60%,rgba(0,0,0,0.2)_100%)] pointer-events-none" />
     </section>
   );
-};
+}
 
-// Chapter Divider Component
-const ChapterDivider = ({
-  chapter,
-  title,
-  subtitle
-}: {
-  chapter: string;
-  title: string;
-  subtitle?: string;
-}) => {
-  const dividerRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const dotsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!dividerRef.current) return;
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: dividerRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none reverse'
-        }
-      });
-
-      tl.fromTo(lineRef.current,
-        { scaleX: 0 },
-        { scaleX: 1, duration: 1.5, ease: 'power2.inOut' }
-      )
-      .fromTo(contentRef.current,
-        { opacity: 0, scale: 0.8, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: 'back.out(1.7)' },
-        '-=1'
-      )
-      .fromTo(dotsRef.current?.children ? Array.from(dotsRef.current.children) : [],
-        { opacity: 0, scale: 0 },
-        { opacity: 0.6, scale: 1, duration: 0.4, stagger: 0.1, ease: 'back.out(2)' },
-        '-=0.3'
-      );
-    }, dividerRef.current);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div ref={dividerRef} className="relative py-12 sm:py-16 lg:py-20 flex items-center justify-center px-4">
-      <div className="absolute inset-0 flex items-center">
-        <div
-          ref={lineRef}
-          className="w-full border-t border-white/20 origin-center"
-          style={{ transform: 'scaleX(0)' }}
-        />
-      </div>
-
-      <div
-        ref={contentRef}
-        className="relative bg-black px-4 sm:px-6 lg:px-10 py-3 sm:py-4 lg:py-5 text-center border border-white/10 rounded-lg backdrop-blur-sm opacity-0"
-      >
-        <div className="text-[10px] sm:text-xs text-white/60 font-mono tracking-widest uppercase mb-1.5 sm:mb-2">
-          {chapter}
-        </div>
-        <div className="text-lg sm:text-xl lg:text-2xl text-white font-cinematic tracking-wide mb-1">
-          {title}
-        </div>
-        {subtitle && (
-          <div className="text-[10px] sm:text-xs text-white/50 font-light">
-            {subtitle}
-          </div>
-        )}
-      </div>
-
-      <div
-        ref={dotsRef}
-        className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 flex space-x-2 sm:space-x-3"
-      >
-        {[0, 1, 2].map((index) => (
-          <div
-            key={index}
-            className="w-1 h-1 bg-white rounded-full opacity-0"
-            style={{ transform: 'scale(0)' }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Navigation Dots Component
-const NavigationDots = () => {
-  const [activeSection, setActiveSection] = useState('hero');
+function NavigationDots() {
+  const activeSection = useActiveSection(SECTIONS);
   const dotsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!dotsRef.current) return;
 
-    gsap.fromTo(Array.from(dotsRef.current.children),
+    gsap.fromTo(
+      Array.from(dotsRef.current.children),
       { opacity: 0, x: 20 },
       {
         opacity: 1,
@@ -243,32 +259,15 @@ const NavigationDots = () => {
         ease: 'power2.out'
       }
     );
-
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
-
-      SECTIONS.forEach(({ id }) => {
-        const element = document.getElementById(id);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(id);
-          }
-        }
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       gsap.to(window, {
-        duration: 1.5,
-        scrollTo: { y: element, offsetY: SCROLL_OFFSET },
-        ease: 'power2.inOut'
+        duration: SCROLL_CONFIG.DURATION,
+        scrollTo: { y: element, offsetY: SCROLL_CONFIG.OFFSET },
+        ease: SCROLL_CONFIG.EASE
       });
     }
   }, []);
@@ -276,7 +275,7 @@ const NavigationDots = () => {
   return (
     <nav
       ref={dotsRef}
-      className="fixed right-4 sm:right-6 lg:right-8 top-1/2 transform -translate-y-1/2 z-40 hidden md:block"
+      className="fixed right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-40 hidden md:block"
       aria-label="Section navigation"
     >
       <div className="flex flex-col space-y-3 lg:space-y-4">
@@ -296,119 +295,110 @@ const NavigationDots = () => {
       </div>
     </nav>
   );
-};
+}
 
-// Loading Component with Progress
-const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    // Progress animation (10% increments)
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 100);
-
-    // Complete after loading
-    const completeTimer = setTimeout(() => {
-      onComplete();
-    }, 900);
-
-    return () => {
-      clearInterval(progressInterval);
-      clearTimeout(completeTimer);
-    };
-  }, [onComplete]);
+function LoadingProgress({ progress }: { progress: number }) {
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
-      {/* Animated Circle with Progress */}
       <div className="relative w-28 h-28 sm:w-32 sm:h-32">
-        {/* Outer rotating ring */}
-        <svg className="absolute inset-0 w-28 h-28 sm:w-32 sm:h-32 -rotate-90">
+        <svg className="absolute inset-0 w-full h-full -rotate-90">
           <circle
-            cx="56"
-            cy="56"
-            r="50"
+            cx="50%"
+            cy="50%"
+            r={radius}
             stroke="rgba(255,255,255,0.1)"
             strokeWidth="2"
             fill="none"
-            className="sm:hidden"
           />
           <circle
-            cx="64"
-            cy="64"
-            r="58"
-            stroke="rgba(255,255,255,0.1)"
-            strokeWidth="2"
-            fill="none"
-            className="hidden sm:block"
-          />
-          <circle
-            cx="56"
-            cy="56"
-            r="50"
+            cx="50%"
+            cy="50%"
+            r={radius}
             stroke="white"
             strokeWidth="2"
             fill="none"
-            strokeDasharray={`${2 * Math.PI * 50}`}
-            strokeDashoffset={`${2 * Math.PI * 50 * (1 - progress / 100)}`}
-            className="transition-all duration-200 ease-out sm:hidden"
-            style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-            }}
-          />
-          <circle
-            cx="64"
-            cy="64"
-            r="58"
-            stroke="white"
-            strokeWidth="2"
-            fill="none"
-            strokeDasharray={`${2 * Math.PI * 58}`}
-            strokeDashoffset={`${2 * Math.PI * 58 * (1 - progress / 100)}`}
-            className="transition-all duration-200 ease-out hidden sm:block"
-            style={{
-              filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))'
-            }}
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - progress / 100)}
+            className="transition-all duration-200 ease-out"
+            style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.5))' }}
           />
         </svg>
-
-        {/* Progress percentage */}
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-white/80 text-sm sm:text-base font-mono font-bold">
             {Math.round(progress)}%
           </span>
         </div>
       </div>
-
-      {/* Loading text */}
-      <div className="text-center">
-        <motion.div
-          className="text-white/70 text-sm sm:text-base tracking-wider"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-        >
-          LOADING...
-        </motion.div>
-      </div>
+      <motion.div
+        className="text-white/70 text-sm sm:text-base tracking-wider"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        LOADING...
+      </motion.div>
     </div>
   );
-};
+}
 
-// Splash Screen Component with Music Options
-const SplashScreen = ({ 
-  isVisible, 
-  onStart 
-}: { 
-  isVisible: boolean; 
+interface StartButtonProps {
+  onClick: () => void;
+  label: string;
+  variant?: 'primary' | 'secondary';
+}
+
+function StartButton({ onClick, label, variant = 'primary' }: StartButtonProps) {
+  if (variant === 'secondary') {
+    return (
+      <motion.button
+        onClick={onClick}
+        className="group relative text-white/50 hover:text-white/90 text-xs tracking-[0.2em] transition-all duration-300 px-3 py-1.5"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <span className="relative">
+          {label}
+          <motion.span className="absolute -bottom-1 left-0 w-0 h-px bg-white/50 group-hover:w-full transition-all duration-300" />
+        </span>
+      </motion.button>
+    );
+  }
+
+  return (
+    <motion.button
+      onClick={onClick}
+      className="group relative px-8 lg:px-10 py-2.5 bg-transparent border-2 border-white/30 text-white font-medium text-xs lg:text-sm tracking-[0.15em] overflow-hidden backdrop-blur-sm transition-all duration-500"
+      whileHover={{ scale: 1.05, borderColor: 'rgba(255, 255, 255, 1)' }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <motion.div className="absolute inset-0 bg-transparent group-hover:bg-white transition-all duration-500" />
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100"
+        initial={{ x: '-100%' }}
+        whileHover={{ x: '200%' }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+      />
+      <span className="relative z-10 flex items-center justify-center gap-2 text-white font-bold group-hover:text-black transition-colors duration-500">
+        {label}
+        <motion.span
+          animate={{ x: [0, 4, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          →
+        </motion.span>
+      </span>
+    </motion.button>
+  );
+}
+
+interface SplashScreenProps {
+  isVisible: boolean;
   onStart: (withMusic: boolean) => void;
-}) => {
+}
+
+function SplashScreen({ isVisible, onStart }: SplashScreenProps) {
   const splashRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<'loading' | 'ready'>('loading');
 
@@ -416,15 +406,15 @@ const SplashScreen = ({
     setPhase('ready');
   }, []);
 
+  const progress = useLoadingProgress(handleLoadingComplete);
+
   const handleStart = useCallback((withMusic: boolean) => {
     if (splashRef.current) {
       gsap.to(splashRef.current, {
         opacity: 0,
         duration: 0.8,
         ease: 'power2.inOut',
-        onComplete: () => {
-          onStart(withMusic);
-        }
+        onComplete: () => onStart(withMusic)
       });
     }
   }, [onStart]);
@@ -436,114 +426,63 @@ const SplashScreen = ({
       ref={splashRef}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black px-4"
     >
-      {/* Animated background grid */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '50px 50px'
+          }}
+        />
       </div>
 
       <AnimatePresence mode="wait">
         {phase === 'loading' ? (
           <motion.div
-            key="loading-phase"
+            key="loading"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.3 } }}
           >
-            <LoadingScreen onComplete={handleLoadingComplete} />
+            <LoadingProgress progress={progress} />
           </motion.div>
         ) : (
           <motion.div
-            key="ready-phase"
-            className="text-center space-y-8 sm:space-y-10"
+            key="ready"
+            className="text-center space-y-8"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
           >
-
-            {/* Buttons */}
-            <motion.div 
+            <motion.div
+              className="text-white text-4xl font-extrabold tracking-widest"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              READY
+            </motion.div>
+            <motion.div
               className="flex flex-col items-center space-y-4"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-            {/* Ready indicator */}
-            <motion.div
-  className="text-white text-3xl sm:text-3xl lg:text-4xl font-extrabold tracking-widest"
-  initial={{ opacity: 0, y: 10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.2 }}
->
-  READY
-</motion.div>
-
-
-              {/* Transparent Start Button */}
-<motion.button
-  onClick={() => handleStart(true)}
-  className="group relative px-6 sm:px-8 lg:px-10 py-2 sm:py-2.5 bg-transparent border-2 border-white/30 text-white font-medium text-[10px] sm:text-xs lg:text-sm tracking-[0.15em] overflow-hidden backdrop-blur-sm transition-all duration-500"
-  whileHover={{ 
-    scale: 1.05,
-    borderColor: 'rgba(255, 255, 255, 1)',
-  }}
-  whileTap={{ scale: 0.98 }}
->
-  {/* Background putih saat hover */}
-  <motion.div
-    className="absolute inset-0 bg-transparent group-hover:bg-white transition-all duration-500"
-  />
-
-  {/* Efek kilau */}
-  <motion.div
-    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 group-hover:opacity-100"
-    initial={{ x: '-100%' }}
-    whileHover={{ x: '200%' }}
-    transition={{ duration: 1.2, ease: "easeInOut" }}
-  />
-
-  {/* Teks berubah hitam saat hover */}
-  <span className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 text-white font-bold group-hover:text-black transition-colors duration-500">
-    START
-    <motion.span
-      animate={{ x: [0, 4, 0] }}
-      transition={{ duration: 1.5, repeat: Infinity }}
-    >
-      →
-    </motion.span>
-  </span>
-</motion.button>
-
-
-
-              {/* Start Without Music */}
-              <motion.button
+              <StartButton onClick={() => handleStart(true)} label="START" />
+              <StartButton
                 onClick={() => handleStart(false)}
-                className="group relative text-white/50 hover:text-white/90 text-[10px] sm:text-xs mb-10 tracking-[0.2em] transition-all duration-300 px-3 py-1.5"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="relative">
-                  Continue without music
-                  <motion.span
-                    className="absolute -bottom-1 left-0 w-0 h-px bg-white/50 group-hover:w-full transition-all duration-300"
-                    whileHover={{ width: '100%' }}
-                  />
-                </span>
-              </motion.button>
+                label="Continue without music"
+                variant="secondary"
+              />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
-};
+}
 
-// Ambient Elements Component
-const AmbientElements = ({ mousePosition }: { mousePosition: MousePosition }) => {
+function AmbientElements({ mousePosition }: { mousePosition: MousePosition }) {
   const particlesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -571,34 +510,21 @@ const AmbientElements = ({ mousePosition }: { mousePosition: MousePosition }) =>
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Mouse-following light */}
       <motion.div
-        className="fixed pointer-events-none w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full opacity-[0.02] blur-3xl"
-        style={{
-          background: 'radial-gradient(circle, white 0%, transparent 70%)',
-        }}
-        animate={{
-          x: mousePosition.x * 50,
-          y: mousePosition.y * 50,
-        }}
+        className="fixed pointer-events-none w-96 h-96 rounded-full opacity-[0.02] blur-3xl"
+        style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
+        animate={{ x: mousePosition.x * 50, y: mousePosition.y * 50 }}
         transition={{ type: "spring", stiffness: 100, damping: 30 }}
       />
-
-      {/* Particles */}
       <div ref={particlesRef} className="hidden sm:block">
-        {Array.from({ length: 6 }, (_, index) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <div
-            key={index}
+            key={i}
             className="absolute w-1 h-1 bg-white/10 rounded-full"
-            style={{
-              left: `${20 + (index * 15)}%`,
-              top: `${10 + (index * 20)}%`,
-            }}
+            style={{ left: `${20 + (i * 15)}%`, top: `${10 + (i * 20)}%` }}
           />
         ))}
       </div>
-
-      {/* Light rays */}
       <div className="hidden lg:block">
         <div className="absolute top-0 left-1/4 w-px h-screen bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-30" />
         <div className="absolute top-0 right-1/3 w-px h-screen bg-gradient-to-b from-transparent via-white/3 to-transparent opacity-50" />
@@ -606,44 +532,58 @@ const AmbientElements = ({ mousePosition }: { mousePosition: MousePosition }) =>
       </div>
     </div>
   );
-};
+}
 
-// Main Component
+function BackToTopButton() {
+  const scrollToTop = useCallback(() => {
+    gsap.to(window, {
+      duration: SCROLL_CONFIG.DURATION,
+      scrollTo: { y: 0 },
+      ease: SCROLL_CONFIG.EASE
+    });
+  }, []);
+
+  return (
+    <motion.button
+      onClick={scrollToTop}
+      className="fixed bottom-8 right-8 z-40 w-12 h-12 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-lg"
+      aria-label="Back to top"
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 1, duration: 0.5 }}
+      whileHover={{
+        scale: 1.1,
+        borderColor: 'rgba(255,255,255,0.4)',
+        boxShadow: '0 0 20px rgba(255,255,255,0.2)'
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+    </motion.button>
+  );
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
-  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
+  const mousePosition = useMouseTracking();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Mouse tracking
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: (e.clientY / window.innerHeight) * 2 - 1
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Handle start
   const handleStart = useCallback((withMusic: boolean) => {
     setShowSplash(false);
     setHasStarted(true);
     
-    // Music implementation
     if (withMusic) {
-      // You can add your music file here
-      // Example: audioRef.current = new Audio('/path-to-your-music.mp3');
-      // audioRef.current.loop = true;
-      // audioRef.current.play().catch(err => console.log('Audio play failed:', err));
       console.log('Starting with music...');
     }
   }, []);
 
-  // GSAP initialization
   useEffect(() => {
     if (!hasStarted) return;
 
@@ -656,9 +596,9 @@ export default function Home() {
         const targetElement = document.querySelector(target.hash);
         if (targetElement) {
           gsap.to(window, {
-            duration: 1.5,
-            scrollTo: { y: targetElement, offsetY: SCROLL_OFFSET },
-            ease: 'power2.inOut'
+            duration: SCROLL_CONFIG.DURATION,
+            scrollTo: { y: targetElement, offsetY: SCROLL_CONFIG.OFFSET },
+            ease: SCROLL_CONFIG.EASE
           });
         }
       }
@@ -672,7 +612,6 @@ export default function Home() {
     };
   }, [hasStarted]);
 
-  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -684,73 +623,35 @@ export default function Home() {
 
   return (
     <>
-      {/* Splash Screen */}
       <SplashScreen isVisible={showSplash} onStart={handleStart} />
 
-      {/* Main Content - Only render when started */}
       {hasStarted && (
         <>
-          {/* Navigation - Import from layout */}
           <Navigation />
-          
-          <div className="relative">
-            <ScrollProgress />
-            <NavigationDots />
-            <AmbientElements mousePosition={mousePosition} />
+          <ScrollProgress />
+          <NavigationDots />
+          <AmbientElements mousePosition={mousePosition} />
 
-            <main className="relative z-20">
-              <SceneTransition id="hero" className="!min-h-screen">
-                <Hero />
-              </SceneTransition>
+          <main className="relative z-20">
+            <SceneTransition id="hero" className="!min-h-screen">
+              <Hero />
+            </SceneTransition>
 
-              <ChapterDivider chapter="Chapter II" title="SKILLS" />
+            <SceneTransition id="skills">
+              <Skills />
+            </SceneTransition>
 
-              <SceneTransition id="skills">
-                <Skills />
-              </SceneTransition>
+            <SceneTransition id="projects">
+              <Projects />
+            </SceneTransition>
 
-              <ChapterDivider chapter="Chapter III" title="Projects" />
+            <SceneTransition id="contact">
+              <Contact />
+            </SceneTransition>
+          </main>
 
-              <SceneTransition id="projects">
-                <Projects />
-              </SceneTransition>
-
-              <ChapterDivider chapter="End" title="Contact" />
-
-              <SceneTransition id="contact">
-                <Contact />
-              </SceneTransition>
-            </main>
-
-            {/* Footer - Import from layout */}
-            <Footer />
-
-            {/* Back to top button */}
-            <motion.button
-              onClick={() => {
-                gsap.to(window, {
-                  duration: 1.5,
-                  scrollTo: { y: 0 },
-                  ease: 'power2.inOut'
-                });
-              }}
-              className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8 z-40 w-10 h-10 sm:w-12 sm:h-12 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-lg"
-              aria-label="Back to top"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1, duration: 0.5 }}
-              whileHover={{
-                scale: 1.1,
-                borderColor: 'rgba(255,255,255,0.4)',
-                boxShadow: '0 0 20px rgba(255,255,255,0.2)'
-              }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-              </svg>
-            </motion.button>
-          </div>
+          <Footer />
+          <BackToTopButton />
         </>
       )}
     </>
