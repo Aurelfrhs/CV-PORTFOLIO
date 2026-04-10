@@ -7,11 +7,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Contact from './components/Contact';
 import { Hero } from './components/Hero';
 import Projects from './components/Projects';
-import Skills from './components/Skills';
+import About from './components/About';
 import { Footer } from './layouts/Footer';
 import { Navigation } from './layouts/Navigation';
 
-// Register GSAP plugins
+// Register GSAP plugins (client-side only)
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
@@ -36,15 +36,13 @@ interface MousePosition {
 
 const SECTIONS: Section[] = [
   { id: 'hero', label: 'Hero' },
-  { id: 'skills', label: 'Skills' },
+  { id: 'About', label: 'About' },
   { id: 'projects', label: 'Projects' },
   { id: 'contact', label: 'Contact' }
 ];
 
 const SCROLL_CONFIG = {
   OFFSET: 80,
-  DURATION: 1.5,
-  EASE: 'power2.inOut'
 } as const;
 
 const ANIMATION_CONFIG = {
@@ -85,18 +83,15 @@ function useScrollProgress() {
     const updateProgress = () => {
       const scrolled = window.scrollY;
       const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrolled / maxScroll, 1);
+      const progress = maxScroll > 0 ? Math.min(scrolled / maxScroll, 1) : 0;
       
       if (progressRef.current) {
-        gsap.to(progressRef.current, {
-          scaleX: progress,
-          duration: 0.1,
-          ease: 'none'
-        });
+        progressRef.current.style.transform = `scaleX(${progress})`;
       }
     };
 
     window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
     return () => window.removeEventListener('scroll', updateProgress);
   }, []);
 
@@ -131,6 +126,8 @@ function useActiveSection(sections: Section[]) {
 
 function useLoadingProgress(onComplete: () => void) {
   const [progress, setProgress] = useState(0);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
     const progressInterval = setInterval(() => {
@@ -144,14 +141,14 @@ function useLoadingProgress(onComplete: () => void) {
     }, ANIMATION_CONFIG.LOADING_INTERVAL);
 
     const completeTimer = setTimeout(() => {
-      onComplete();
+      onCompleteRef.current();
     }, ANIMATION_CONFIG.LOADING_DURATION);
 
     return () => {
       clearInterval(progressInterval);
       clearTimeout(completeTimer);
     };
-  }, [onComplete]);
+  }, []);
 
   return progress;
 }
@@ -264,11 +261,8 @@ function NavigationDots() {
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      gsap.to(window, {
-        duration: SCROLL_CONFIG.DURATION,
-        scrollTo: { y: element, offsetY: SCROLL_CONFIG.OFFSET },
-        ease: SCROLL_CONFIG.EASE
-      });
+      const top = element.getBoundingClientRect().top + window.scrollY - SCROLL_CONFIG.OFFSET;
+      window.scrollTo({ top, behavior: 'smooth' });
     }
   }, []);
 
@@ -536,11 +530,7 @@ function AmbientElements({ mousePosition }: { mousePosition: MousePosition }) {
 
 function BackToTopButton() {
   const scrollToTop = useCallback(() => {
-    gsap.to(window, {
-      duration: SCROLL_CONFIG.DURATION,
-      scrollTo: { y: 0 },
-      ease: SCROLL_CONFIG.EASE
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   return (
@@ -580,6 +570,7 @@ export default function Home() {
     setHasStarted(true);
     
     if (withMusic) {
+      // Music placeholder - add audio source when available
       console.log('Starting with music...');
     }
   }, []);
@@ -593,13 +584,10 @@ export default function Home() {
       const target = e.target as HTMLAnchorElement;
       if (target.hash && target.getAttribute('href')?.startsWith('#')) {
         e.preventDefault();
-        const targetElement = document.querySelector(target.hash);
+        const targetElement = document.querySelector(target.hash) as HTMLElement;
         if (targetElement) {
-          gsap.to(window, {
-            duration: SCROLL_CONFIG.DURATION,
-            scrollTo: { y: targetElement, offsetY: SCROLL_CONFIG.OFFSET },
-            ease: SCROLL_CONFIG.EASE
-          });
+          const top = targetElement.getBoundingClientRect().top + window.scrollY - SCROLL_CONFIG.OFFSET;
+          window.scrollTo({ top, behavior: 'smooth' });
         }
       }
     };
@@ -637,8 +625,8 @@ export default function Home() {
               <Hero />
             </SceneTransition>
 
-            <SceneTransition id="skills">
-              <Skills />
+            <SceneTransition id="about">
+              <About />
             </SceneTransition>
 
             <SceneTransition id="projects">

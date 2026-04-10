@@ -166,178 +166,208 @@ const BackgroundElements = ({
   gridX: any;
   gridY: any;
   blur: any;
-}) => (
-  <motion.div className="absolute inset-0" style={{ filter: useTransform(blur, (b: number) => `blur(${b}px)`) }}>
+}) => {
+  const blurFilter = useTransform(blur, (b: number) => `blur(${b}px)`);
+  const ringScale1 = useTransform(scrollYProgress, [0, 1], [1, 0.5]);
+  const ringRotateInverse = useTransform(bgRotate, (r: number) => -r);
+  const ringScale2 = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
+  const blobScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.3, 0.6]);
+  const squareY = useTransform(scrollY, [0, 500], [0, 200]);
+  const squareRotate = useTransform(scrollY, [0, 500], [0, 180]);
+  const squareOpacity = useTransform(scrollY, [0, 300], [0.3, 0]);
+
+  return (
+    <motion.div className="absolute inset-0" style={{ filter: blurFilter }}>
+      <motion.div
+        className="absolute inset-0 bg-gradient-radial from-white/5 via-transparent to-transparent"
+        style={{ scale: bgScale }}
+        animate={{ opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      <motion.div className="absolute inset-0">
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-32 h-32 border border-white/10 rounded-full"
+          style={{ y: y1, rotate: bgRotate, scale: ringScale1 }}
+        />
+        <motion.div
+          className="absolute top-3/4 right-1/3 w-24 h-24 border border-white/5"
+          style={{ y: y2, rotate: ringRotateInverse, scale: ringScale2 }}
+        />
+        <motion.div
+          className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full blur-xl"
+          style={{ y: y3, scale: blobScale }}
+          animate={{ opacity: [0.3, 0.7, 0.3] }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 left-1/3 w-40 h-40 border-2 border-white/5 rounded-lg"
+          style={{ 
+            y: squareY,
+            rotate: squareRotate,
+            opacity: squareOpacity
+          }}
+        />
+      </motion.div>
+
+      <motion.div className="absolute inset-0 opacity-[0.02]" style={{ x: gridX, y: gridY }}>
+        <div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                             linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '50px 50px'
+          }} 
+        />
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Single particle component that uses hooks properly at top level
+const Particle = ({ particle, scrollY }: { particle: { id: number; left: string; top: string; duration: number; delay: number; size: number }; scrollY: any }) => {
+  const particleY = useTransform(scrollY, [0, 1000], [0, -500 + particle.id * 50]);
+  const particleOpacity = useTransform(scrollY, [0, 300], [0.3, 0]);
+
+  return (
     <motion.div
-      className="absolute inset-0 bg-gradient-radial from-white/5 via-transparent to-transparent"
-      style={{ scale: bgScale }}
-      animate={{ opacity: [0.3, 0.6, 0.3] }}
-      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      className="absolute bg-white/10 rounded-full"
+      style={{
+        width: `${particle.size}rem`,
+        height: `${particle.size}rem`,
+        left: particle.left,
+        top: particle.top,
+        y: particleY,
+        opacity: particleOpacity
+      }}
+      animate={{
+        y: [-20, 20, -20],
+        x: [-10, 10, -10],
+        scale: [0.5, 1, 0.5],
+      }}
+      transition={{
+        duration: particle.duration,
+        repeat: Infinity,
+        delay: particle.delay,
+        ease: "easeInOut"
+      }}
     />
-
-    <motion.div className="absolute inset-0">
-      <motion.div
-        className="absolute top-1/4 left-1/4 w-32 h-32 border border-white/10 rounded-full"
-        style={{ y: y1, rotate: bgRotate, scale: useTransform(scrollYProgress, [0, 1], [1, 0.5]) }}
-      />
-      <motion.div
-        className="absolute top-3/4 right-1/3 w-24 h-24 border border-white/5"
-        style={{ y: y2, rotate: useTransform(bgRotate, (r: number) => -r), scale: useTransform(scrollYProgress, [0, 1], [1, 0.3]) }}
-      />
-      <motion.div
-        className="absolute top-1/2 right-1/4 w-16 h-16 bg-white/5 rounded-full blur-xl"
-        style={{ y: y3, scale: useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.3, 0.6]) }}
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 4, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute bottom-1/4 left-1/3 w-40 h-40 border-2 border-white/5 rounded-lg"
-        style={{ 
-          y: useTransform(scrollY, [0, 500], [0, 200]),
-          rotate: useTransform(scrollY, [0, 500], [0, 180]),
-          opacity: useTransform(scrollY, [0, 300], [0.3, 0])
-        }}
-      />
-    </motion.div>
-
-    <motion.div className="absolute inset-0 opacity-[0.02]" style={{ x: gridX, y: gridY }}>
-      <div 
-        className="absolute inset-0" 
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px'
-        }} 
-      />
-    </motion.div>
-  </motion.div>
-);
+  );
+};
 
 const FloatingParticles = ({ scrollY }: { scrollY: any }) => {
   const particles = useMemo(() => 
     Array.from({ length: 12 }, (_, i) => ({
       id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      duration: 3 + Math.random() * 5,
-      delay: Math.random() * 3,
-      size: 1 + Math.random() * 2
+      left: `${(i * 8.3) % 100}%`,
+      top: `${(i * 13.7) % 100}%`,
+      duration: 3 + (i % 5),
+      delay: (i % 3),
+      size: 1 + (i % 2)
     })), []
   );
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute bg-white/10 rounded-full"
-          style={{
-            width: `${particle.size}rem`,
-            height: `${particle.size}rem`,
-            left: particle.left,
-            top: particle.top,
-            y: useTransform(scrollY, [0, 1000], [0, -500 + particle.id * 50]),
-            opacity: useTransform(scrollY, [0, 300], [0.3, 0])
-          }}
-          animate={{
-            y: [-20, 20, -20],
-            x: [-10, 10, -10],
-            scale: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            delay: particle.delay,
-            ease: "easeInOut"
-          }}
-        />
+        <Particle key={particle.id} particle={particle} scrollY={scrollY} />
       ))}
     </div>
   );
 };
 
-const DecorativeEffects = ({ scrollY, scrollYProgress }: { scrollY: any; scrollYProgress: any }) => (
-  <>
-    {/* Morphing Ring System */}
-    <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-      <motion.svg
-        width="800"
-        height="800"
-        viewBox="0 0 800 800"
-        className="absolute"
-        style={{
-          opacity: useTransform(scrollY, [0, 400], [0.6, 0]),
-          scale: useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 0.8])
-        }}
-      >
-        {[200, 250, 300].map((r, i) => (
-          <motion.circle
-            key={r}
-            cx="400"
-            cy="400"
-            r={r}
-            fill="none"
-            stroke={`rgba(255,255,255,${0.1 - i * 0.03})`}
-            strokeWidth={2 - i * 0.5}
-            strokeDasharray={`${10 + i * 5} ${20 + i * 5}`}
-            animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-            transition={{ duration: 20 + i * 10, repeat: Infinity, ease: "linear" }}
-          />
-        ))}
-      </motion.svg>
-    </motion.div>
+const DecorativeEffects = ({ scrollY, scrollYProgress }: { scrollY: any; scrollYProgress: any }) => {
+  const ringOpacity = useTransform(scrollY, [0, 400], [0.6, 0]);
+  const ringScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 0.8]);
+  const scannerOpacity = useTransform(scrollY, [0, 300], [0.7, 0]);
+  const vignetteOpacity = useTransform(scrollY, [0, 300], [1, 0.5]);
 
-    {/* Binary Rain Effect */}
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {Array.from({ length: 20 }, (_, i) => (
-        <motion.div
-          key={`binary-${i}`}
-          className="absolute text-white/5 font-mono text-xs"
-          style={{ left: `${i * 5}%`, top: '-10%' }}
-          animate={{
-            y: ['0vh', '110vh'],
-            opacity: [0, 0.5, 0]
-          }}
-          transition={{
-            duration: 10 + Math.random() * 10,
-            repeat: Infinity,
-            delay: Math.random() * 5,
-            ease: "linear"
+  return (
+    <>
+      {/* Morphing Ring System */}
+      <motion.div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        <motion.svg
+          width="800"
+          height="800"
+          viewBox="0 0 800 800"
+          className="absolute"
+          style={{
+            opacity: ringOpacity,
+            scale: ringScale
           }}
         >
-          {Array(20).fill(0).map(() => Math.random() > 0.5 ? '1' : '0').join('\n')}
-        </motion.div>
-      ))}
-    </div>
+          {[200, 250, 300].map((r, i) => (
+            <motion.circle
+              key={r}
+              cx="400"
+              cy="400"
+              r={r}
+              fill="none"
+              stroke={`rgba(255,255,255,${0.1 - i * 0.03})`}
+              strokeWidth={2 - i * 0.5}
+              strokeDasharray={`${10 + i * 5} ${20 + i * 5}`}
+              animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
+              transition={{ duration: 20 + i * 10, repeat: Infinity, ease: "linear" }}
+            />
+          ))}
+        </motion.svg>
+      </motion.div>
 
-    {/* Holographic Scanner */}
-    <motion.div
-      className="absolute left-0 right-0 h-px pointer-events-none"
-      style={{
-        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
-        boxShadow: "0 0 20px rgba(255,255,255,0.5)",
-        opacity: useTransform(scrollY, [0, 300], [0.7, 0])
-      }}
-      animate={{ top: ['0%', '100%'] }}
-      transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-    />
+      {/* Binary Rain Effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 20 }, (_, i) => (
+          <motion.div
+            key={`binary-${i}`}
+            className="absolute text-white/5 font-mono text-xs"
+            style={{ left: `${i * 5}%`, top: '-10%' }}
+            animate={{
+              y: ['0vh', '110vh'],
+              opacity: [0, 0.5, 0]
+            }}
+            transition={{
+              duration: 10 + (i % 10),
+              repeat: Infinity,
+              delay: (i % 5),
+              ease: "linear"
+            }}
+          >
+            {Array(20).fill(0).map((_, j) => (j + i) % 2 === 0 ? '1' : '0').join('\n')}
+          </motion.div>
+        ))}
+      </div>
 
-    {/* Vignette Pulse */}
-    <motion.div
-      className="absolute inset-0 pointer-events-none"
-      style={{
-        background: "radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%)",
-        opacity: useTransform(scrollY, [0, 300], [1, 0.5])
-      }}
-      animate={{ opacity: [0.8, 0.95, 0.8] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-    />
-  </>
-);
+      {/* Holographic Scanner */}
+      <motion.div
+        className="absolute left-0 right-0 h-px pointer-events-none"
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+          boxShadow: "0 0 20px rgba(255,255,255,0.5)",
+          opacity: scannerOpacity
+        }}
+        animate={{ top: ['0%', '100%'] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+      />
+
+      {/* Vignette Pulse */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%)",
+          opacity: vignetteOpacity
+        }}
+        animate={{ opacity: [0.8, 0.95, 0.8] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </>
+  );
+};
 
 const ScrollIndicator = ({ controls, scrollY }: any) => {
+  const indicatorOpacity = useTransform(scrollY, [0, 150], [1, 0]);
+  const indicatorY = useTransform(scrollY, [0, 200], [0, 100]);
+
   const handleClick = useCallback(() => {
-    document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   return (
@@ -346,8 +376,8 @@ const ScrollIndicator = ({ controls, scrollY }: any) => {
       initial="hidden"
       animate={controls}
       style={{ 
-        opacity: useTransform(scrollY, [0, 150], [1, 0]),
-        y: useTransform(scrollY, [0, 200], [0, 100])
+        opacity: indicatorOpacity,
+        y: indicatorY
       }}
       className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
     >
@@ -388,6 +418,10 @@ export const Hero = () => {
   const { mouseXSpring, mouseYSpring } = useMouseTracking(heroRef);
   const scrollAnimations = useScrollAnimations(heroRef);
 
+  // Pre-compute transforms for description section
+  const descOpacity = useTransform(scrollAnimations.scrollY, [0, 200], [1, 0]);
+  const descY = useTransform(scrollAnimations.scrollY, [0, 300], [0, -50]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -397,7 +431,7 @@ export const Hero = () => {
   }, [controls]);
 
   const title = "AUREL FRISTIAN";
-  const subtitle = "Junior Frontend Developer";
+  const subtitle = "Junior Backend Developer";
 
   return (
     <motion.div
@@ -471,8 +505,8 @@ export const Hero = () => {
           animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 1 }}
           style={{ 
-            opacity: useTransform(scrollAnimations.scrollY, [0, 200], [1, 0]),
-            y: useTransform(scrollAnimations.scrollY, [0, 300], [0, -50])
+            opacity: descOpacity,
+            y: descY
           }}
           className="mb-8"
         >
@@ -484,7 +518,7 @@ export const Hero = () => {
 
       <ScrollIndicator controls={controls} scrollY={scrollAnimations.scrollY} />
       <FloatingParticles scrollY={scrollAnimations.scrollY} />
-      <DecorativeEffects scrollY={scrollAnimations.scrollY} scrollYProgress={scrollAnimations.scale} />
+      <DecorativeEffects scrollY={scrollAnimations.scrollY} scrollYProgress={scrollAnimations.scrollYProgress} />
     </motion.div>
   );
 };
