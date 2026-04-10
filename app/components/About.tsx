@@ -34,7 +34,7 @@ export default function About() {
         <div className="max-w-5xl mx-auto">
           {/* Section Label */}
           <p className="text-sm font-medium text-white/40 tracking-[0.3em] uppercase mb-6">
-            About Me
+            About
           </p>
 
           {/* Main Content Grid */}
@@ -42,9 +42,9 @@ export default function About() {
             {/* Left - Big Statement */}
             <div>
               <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight tracking-tight">
-                Fullstack<br />
+                Junior<br />
+                Backend<br />
                 Developer<br />
-                <span className="text-white/30">&amp; Designer</span>
               </h2>
 
               {/* Divider */}
@@ -53,9 +53,9 @@ export default function About() {
               {/* Stats */}
               <div className="grid grid-cols-2 gap-8">
                 {[
-                  { number: '2+', label: 'Years Experience' },
-                  { number: '10+', label: 'Projects Built' },
-                  { number: '5+', label: 'Happy Clients' },
+                  { number: '3+', label: 'Years Experience' },
+                  { number: '-', label: 'Projects Built' },
+                  { number: '-', label: 'Happy Clients' },
                   { number: '∞', label: 'Cups of Coffee' },
                 ].map((stat) => (
                   <div key={stat.label}>
@@ -75,13 +75,10 @@ export default function About() {
               {/* Bio */}
               <div>
                 <p className="text-lg text-white/70 leading-relaxed mb-4">
-                  I'm Aurel, a fullstack developer based in Bandung, Indonesia. 
-                  I craft clean, performant web experiences with a strong eye for design.
+                  Fresh graduate backend developer with a strong interest in building scalable and reliable systems.
                 </p>
                 <p className="text-base text-white/50 leading-relaxed">
-                  My approach bridges the gap between development and design — turning ideas into 
-                  products that look great and work even better. I enjoy working across the entire 
-                  stack, from pixel-perfect UIs to scalable backend systems.
+                  Recently graduated from a vocational high school in Software Development. I have hands-on experience developing and improving backend systems, including building real-time applications, designing APIs, and managing databases. My experience includes contributing to an existing football club website (Expose FC) and developing a production leave management system during a 5-month internship.
                 </p>
               </div>
 
