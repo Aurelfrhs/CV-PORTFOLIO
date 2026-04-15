@@ -132,8 +132,8 @@ export default function About() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    'React', 'Next.js', 'TypeScript', 'Node.js',
-                    'Tailwind CSS', 'PostgreSQL', 'Prisma', 'Figma',
+                    'Laravel', 'React', 'Next.js', 'TypeScript', 'Node.js',
+                    'Tailwind CSS', 'PostgreSQL', 'Figma',
                   ].map((tech) => (
                     <span
                       key={tech}
