@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 function useScrollAnimation(threshold = 0.1) {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,26 +32,25 @@ export default function About() {
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
         }`}
       >
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Section Label */}
-          <p className="text-sm font-medium text-white/40 tracking-[0.3em] uppercase mb-6">
+          <p className="text-sm font-medium text-white/40 tracking-[0.3em] uppercase mb-10">
             About
           </p>
 
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
-            {/* Left - Big Statement */}
+          {/* Main Content Grid — 3 columns: text | photo | bio+stack */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-12 lg:gap-16 items-start">
+
+            {/* Left — Big Statement + Stats */}
             <div>
               <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight tracking-tight">
                 Junior<br />
                 Backend<br />
-                Developer<br />
+                Developer
               </h2>
 
-              {/* Divider */}
               <div className="w-16 h-px bg-white/20 mt-10 mb-10" />
 
-              {/* Stats */}
               <div className="grid grid-cols-2 gap-8">
                 {[
                   { number: '3+', label: 'Years Experience' },
@@ -70,8 +70,51 @@ export default function About() {
               </div>
             </div>
 
-            {/* Right - Bio & Stack */}
-            <div className="space-y-10">
+            {/* Center — Profile Photo */}
+            <div
+              className={`flex justify-center lg:justify-start transition-all duration-1000 delay-200 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+              }`}
+            >
+              <div className="relative w-56 sm:w-64 lg:w-72 shrink-0">
+                {/* Decorative border frame */}
+                <div className="absolute -inset-2 border border-white/10 rounded-sm" />
+                <div className="absolute -inset-4 border border-white/5 rounded-sm" />
+
+                {/* Photo container */}
+                <div className="relative overflow-hidden rounded-sm aspect-[3/4] bg-white/5">
+                  <Image
+                    src="/about/aku.jpeg"
+                    alt="Aurel Fristian"
+                    fill
+                    className="object-cover object-center grayscale hover:grayscale-0 transition-all duration-700"
+                    sizes="(max-width: 640px) 224px, (max-width: 1024px) 256px, 288px"
+                    priority
+                  />
+                  {/* Subtle vignette overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                </div>
+
+                {/* Name tag below photo */}
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xs text-white/30 tracking-[0.25em] uppercase">
+                    Aurel F.R.H.S
+                  </span>
+                  {/* Available dot */}
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs text-white/30">Available</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right — Bio & Stack */}
+            <div
+              className={`space-y-10 transition-all duration-1000 delay-300 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+              }`}
+            >
               {/* Bio */}
               <div>
                 <p className="text-lg text-white/70 leading-relaxed mb-4">
@@ -103,14 +146,26 @@ export default function About() {
                 </div>
               </div>
 
-              {/* Currently */}
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-sm text-white/50">
-                  Currently available for freelance & collaboration
-                </span>
-              </div>
+              {/* Download CV */}
+              <a
+                href="/cv/aurel-cv.pdf"
+                download
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm text-white/70 border border-white/20
+                           rounded-full hover:border-white/50 hover:text-white transition-all duration-300 group"
+              >
+                <svg
+                  className="w-4 h-4 group-hover:translate-y-0.5 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download CV
+              </a>
             </div>
+
           </div>
         </div>
       </div>

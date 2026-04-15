@@ -55,6 +55,16 @@ const ANIMATION_CONFIG = {
 } as const;
 
 // ============================================================================
+// SPOTIFY CONFIG
+// Ganti track ID di bawah dengan ID lagu Spotify pilihanmu
+// Cara dapat ID: buka Spotify → klik kanan lagu → Share → Copy Song Link
+// Ambil ID dari URL: open.spotify.com/track/[ID_DI_SINI]
+// ============================================================================
+const SPOTIFY_TRACK_ID = '4xF4ZBGPZKxECeDFrqSAG4'; // ganti ini
+// autoplay=1 bekerja karena iframe di-mount SETELAH user klik START (user gesture)
+const SPOTIFY_EMBED_URL = `https://open.spotify.com/embed/track/${SPOTIFY_TRACK_ID}?utm_source=generator&theme=0&autoplay=1`;
+
+// ============================================================================
 // CUSTOM HOOKS
 // ============================================================================
 
@@ -456,6 +466,17 @@ function SplashScreen({ isVisible, onStart }: SplashScreenProps) {
             >
               READY
             </motion.div>
+
+            {/* Music hint */}
+            <motion.p
+              className="text-white/30 text-xs tracking-[0.2em] uppercase"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+            >
+              — with background music —
+            </motion.p>
+
             <motion.div
               className="flex flex-col items-center space-y-4"
               initial={{ opacity: 0 }}
@@ -475,6 +496,117 @@ function SplashScreen({ isVisible, onStart }: SplashScreenProps) {
     </div>
   );
 }
+
+// ============================================================================
+// SPOTIFY PLAYER WIDGET
+// Muncul di pojok kiri bawah saat musik aktif, bisa di-minimize
+// ============================================================================
+interface SpotifyPlayerProps {
+  isVisible: boolean;
+}
+
+function SpotifyPlayer({ isVisible }: SpotifyPlayerProps) {
+  const [minimized, setMinimized] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    // Mount langsung di tick berikutnya — masih dalam konteks user gesture dari klik START
+    const t = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(t);
+  }, [isVisible]);
+
+  // Backup: trigger play via postMessage setelah iframe load
+  const handleIframeLoad = useCallback(() => {
+    if (!iframeRef.current) return;
+    setTimeout(() => {
+      iframeRef.current?.contentWindow?.postMessage({ command: 'play' }, '*');
+    }, 300);
+  }, []);
+
+  if (!isVisible || !mounted) return null;
+
+  return (
+    <motion.div
+      className="fixed bottom-6 left-6 z-40"
+      initial={{ opacity: 0, y: 20, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      {minimized ? (
+        /* Mini pill saat di-minimize */
+        <motion.button
+          onClick={() => setMinimized(false)}
+          className="flex items-center gap-2 px-3 py-2 bg-black/80 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white hover:border-white/30 transition-all duration-300"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          {/* Spotify icon */}
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+          </svg>
+          <span className="text-xs tracking-wider">MUSIC</span>
+          {/* Animated bars */}
+          <div className="flex items-end gap-0.5 h-3">
+            {[1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                className="w-0.5 bg-[#1DB954] rounded-full"
+                animate={{ height: ['40%', '100%', '60%', '80%', '40%'] }}
+                transition={{ duration: 1, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
+              />
+            ))}
+          </div>
+        </motion.button>
+      ) : (
+        /* Full Spotify embed */
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Header bar */}
+          <div className="flex items-center justify-between px-3 py-2 bg-black/90 backdrop-blur-md border border-white/10 border-b-0 rounded-t-xl">
+            <div className="flex items-center gap-2">
+              <svg className="w-3.5 h-3.5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </svg>
+              <span className="text-white/50 text-[10px] tracking-widest uppercase">Now Playing</span>
+            </div>
+            <button
+              onClick={() => setMinimized(true)}
+              className="text-white/40 hover:text-white/80 transition-colors duration-200 p-0.5"
+              aria-label="Minimize player"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Spotify iframe embed */}
+          <iframe
+            ref={iframeRef}
+            src={SPOTIFY_EMBED_URL}
+            width="300"
+            height="80"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="eager"
+            onLoad={handleIframeLoad}
+            className="rounded-b-xl border border-white/10 border-t-0 block"
+            style={{ colorScheme: 'normal' }}
+          />
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// AMBIENT ELEMENTS
+// ============================================================================
 
 function AmbientElements({ mousePosition }: { mousePosition: MousePosition }) {
   const particlesRef = useRef<HTMLDivElement>(null);
@@ -562,17 +694,13 @@ function BackToTopButton() {
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [hasStarted, setHasStarted] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(false);
   const mousePosition = useMouseTracking();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleStart = useCallback((withMusic: boolean) => {
     setShowSplash(false);
     setHasStarted(true);
-    
-    if (withMusic) {
-      // Music placeholder - add audio source when available
-      console.log('Starting with music...');
-    }
+    setMusicEnabled(withMusic);
   }, []);
 
   useEffect(() => {
@@ -600,15 +728,6 @@ export default function Home() {
     };
   }, [hasStarted]);
 
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
   return (
     <>
       <SplashScreen isVisible={showSplash} onStart={handleStart} />
@@ -619,6 +738,9 @@ export default function Home() {
           <ScrollProgress />
           <NavigationDots />
           <AmbientElements mousePosition={mousePosition} />
+
+          {/* Spotify Player — hanya muncul jika user pilih "START" (with music) */}
+          <SpotifyPlayer isVisible={musicEnabled} />
 
           <main className="relative z-20">
             <SceneTransition id="hero" className="!min-h-screen">
